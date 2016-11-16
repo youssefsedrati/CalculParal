@@ -25,20 +25,4 @@ Utilisation
 ```
 mpiexec -np <nb_processes> ./main.out
 ```
-
-* Plot the solution
-
-	* After launching the program using `<nb_processes>` processes, the following command with gather the results in one datafile and plot the computed solution
-	```
-	./plot.rb <nb_processes>
-	``` 
-	*	Change the variable `plotfile` in the file `plot.rb` to change the reference curve (that corresponds to the real solution expected)
-		*	Set this variable to `gnuplot.cmd`for `sin(x) + cos(y)`
-		*	Set this variable to `gnuplot2.cmd`for `x*(1-x)*y*(1-y)`  
-
-* Plot speedups
- 	* The following command will compute the speedup curves using the set parameters, with number of processes starting from 1 up to `<max_processes>`
-	```
-	./benchmarks.rb <max_processes>
-	``` 
-	*	This will also generate solution files that can be plotted using gnuplot
+ 	
