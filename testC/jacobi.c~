@@ -68,6 +68,6 @@ void Jacobi(int maxiter,int eps,double Aii,double Cx,double Cy,int Nx,int N,doub
 	MPI_Barrier(MPI_COMM_WORLD);
   if(myrank == 0){
     printf("Jacobi method terminated after"
-           " %d iterations, squared_dist= %0.12f\n", iter-1,dist);
+           " %d iterations, squared_dist= %0.12f\n", iter,dist);
   }
 }

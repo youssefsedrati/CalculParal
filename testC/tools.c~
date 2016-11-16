@@ -143,8 +143,7 @@ void matvec(double Aii,double Cx,double Cy,int Nx,int Ny,double *Uold,double *U)
 double dist_squared(int N,double* U,double* V){
 	double D = 0, Di;
 	int i;
-	for(i=0;i<=N;++i){
-		Di= U[i]-V[i];
+	for(i=0;i<=N;++i){ 
 		D+= Di*Di;
 	}
 	return D;

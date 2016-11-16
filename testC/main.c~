@@ -81,7 +81,7 @@ int main( void )
   start = MPI_Wtime();
   /* Choix du solveur pour la resolution du systeme */
   if ( meth == 1 ){     
-    Jacobi(maxiter,eps,Aii,Cx,Cy,Nx,N,RHS,U);
+    jacobi(maxiter,eps,Aii,Cx,Cy,Nx,N,RHS,U);
   }else if ( meth == 2 ){
     GC(maxiter,eps,Aii,Cx,Cy,Nx,N,RHS,U);} 
   else
