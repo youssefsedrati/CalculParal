@@ -2,10 +2,10 @@
 #define JACOBI_H
 
 class JacobiMethod{
+public:
 	JacobiMethod();
 	JacobiMethod(double aii,double cx,double cy,int nx,int n,double *rhs,double *u);
 	~JacobiMethod();
-public:
 	void compute(int itermax,double e);
 private:
 // system variables
