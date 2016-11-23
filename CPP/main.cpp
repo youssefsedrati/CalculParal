@@ -8,7 +8,7 @@
 #include "tools.h"
 #include "jacobi.h"
 
-int main( void )
+int main()
 {
   FILE *Infile, *Outfile, *Timefile;
   char FileName[40], Outname[40], Timename[40];
@@ -81,9 +81,9 @@ int main( void )
   start = MPI_Wtime();
   /* Choix du solveur pour la resolution du systeme */
   if ( meth == 1 ){     
-    Jacobi(maxiter,eps,Aii,Cx,Cy,Nx,N,RHS,U);
+    JacobiMethod::JacobiMethod(Aii,Cx,Cy,Nx,N,RHS,U);
   }else if ( meth == 2 ){
-    GC(maxiter,eps,Aii,Cx,Cy,Nx,N,RHS,U);} 
+    CGmethod::CGmethod(Aii,Cx,Cy,Nx,N,RHS,U);} 
   else
    printf("Choix de methode non supporte");
  end = MPI_Wtime() - start;
