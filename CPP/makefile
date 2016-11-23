@@ -3,7 +3,7 @@ EXEC= main.out
 
 all: $(EXEC) 
 
-main.out: main.o conjgrad.o tools.o cdt_bords.o
+main.out: main.o conjgrad.o tools.o cdt_bords.o jacobi.o
 	$(CC) -W -Wall $^ -o $@ -lm
 
 %.out: %.o
@@ -14,3 +14,4 @@ main.out: main.o conjgrad.o tools.o cdt_bords.o
 
 clean: 
 	rm -f *.out sol* time* speedup *.o
+	rm -rf *~
