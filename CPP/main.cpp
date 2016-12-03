@@ -60,7 +60,7 @@ int main()
   /* Calcul des termes de la matrice */
   dx  = Lx/(1.0 + Nx);
   dy  = Ly/(1.0 + Ny);
-  Aii = 2.0*D/(dx*dx)+ 2.0/(dy*dy);  // Terme diagonal de la matrice 
+  Aii = 2.0*D/(dx*dx)+ 2.0*D/(dy*dy);  // Terme diagonal de la matrice 
   Cx  = -1.0*D/(dx*dx);
   Cy  = -1.0*D/(dy*dy);
   N = Nx*Ny;

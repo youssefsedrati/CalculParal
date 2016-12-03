@@ -9,6 +9,7 @@ decomposition::decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, i
 		myRank_y = (myRank-myRank_x)/N_procs_x;
 		decompose();
 		accumulate_global_borders();
+		accumulate_global_inner();
 	}
 }
 
@@ -20,6 +21,7 @@ decomposition::~decomposition(){
 	if(index_global_bottom) free(index_global_bottom);
 	if(index_global_left) free(index_global_left);
 	if(index_global_right) free(index_global_right);
+	if(index_global_inner) free(index_global_inner);
 }
 
 int* decomposition::get_index_x(){
@@ -50,6 +52,10 @@ int* decomposition::get_index_global_right(){
 	return index_global_right;
 }
 
+int* decomposition::get_index_global_inner(){
+	return index_global_inner;
+}
+
 int decomposition::get_myNx(){
 	return myNx;
 }
@@ -60,6 +66,10 @@ int decomposition::get_myNy(){
 
 int decomposition::get_myN(){
 	return myN;
+}
+
+int decomposition::get_myNinner(){
+	return myNinner;
 }
 
 bool decomposition::is_admissable(){
@@ -80,6 +90,10 @@ void decomposition::decompose_x(){
 		if(myRank_x+1==N_procs_x) myNx = Nx-begin;
 	else
 		myNx = 1+Nx/N_procs_x;
+	if((begin*N_procs_x==myRank_x*Nx) && (myRank_x>0) && (myRank_x+1<N_procs_x)){
+		myNx++;
+		begin--;
+	}
 	index_x = (int*) malloc(myNx*sizeof(int));
 	for(int i=0;i<myNx;++i){
 		index_x[i] = begin+i;
@@ -94,6 +108,10 @@ void decomposition::decompose_y(){
 		if(myRank_y+1==N_procs_y) myNy = Ny-begin;
 	else
 		myNy = 1+Ny/N_procs_y;
+	if((begin*N_procs_y==myRank_y*Ny) && (myRank_y>0) && (myRank_y+1<N_procs_y)){
+		myNy++;
+		begin--;
+	}
 	index_y = (int*) malloc(myNy*sizeof(int));
 	for(int i=0;i<myNy;++i){
 		index_y[i] = begin+i;
@@ -112,7 +130,7 @@ void decomposition::accumulate_global_borders(){
 	accumulate_global_top();
 	accumulate_global_bottom();
 	accumulate_global_left();
-	accumulate_global_left();
+	accumulate_global_right();
 }
 
 void decomposition::accumulate_global_top(){
@@ -137,5 +155,13 @@ void decomposition::accumulate_global_left(){
 void decomposition::accumulate_global_right(){
 	index_global_right = (int*) malloc(myNy*sizeof(int));
 	for(int i=0;i<myNy;++i)
-		index_global_right[i]= index_global_right[(i+1)*myNx-1];
+		index_global_right[i]= index_global[(i+1)*myNx-1];
+}
+
+void decomposition::accumulate_global_inner(){
+	myNinner = (myNx-2)*(myNx-2);
+	index_global_inner = (int*) malloc(myNinner*sizeof(int));
+	for(int i=1;i<myNx-1;++i)
+		for(int j=1;j<myNy-1;++j)
+			index_global_inner[i-1+(j-1)*(myNx-2)]= index_global[i+j*myNx];
 }

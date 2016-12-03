@@ -16,8 +16,6 @@ private:
 // MPI variables
   int myrank, nb_procs,
 					fstline,lstline,fst,lst,deb,fin;
-  MPI_Status s1, s2;
-  MPI_Request r1, r2, r3, r4;
 // functions
 	void init(int itermax, double e);
 	void init_sys();

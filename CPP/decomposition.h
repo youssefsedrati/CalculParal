@@ -18,17 +18,20 @@ public:
 	int *get_index_global_bottom();
 	int *get_index_global_left();
 	int *get_index_global_right();
+	int *get_index_global_inner();
 	int get_myNx();
 	int get_myNy();
 	int get_myN();
+	int get_myNinner();
 private:
 	int *index_x=NULL, *index_y=NULL, *index_global=NULL,
 			*index_global_top=NULL, *index_global_bottom=NULL, 
-			*index_global_left=NULL, *index_global_right=NULL;
+			*index_global_left=NULL, *index_global_right=NULL,
+			*index_global_inner=NULL;
 	int myRank, myRank_x, myRank_y,
 			N_procs, N_procs_x, N_procs_y,
 			N, Nx, Ny,
-			myN, myNx, myNy;
+			myN, myNx, myNy, myNinner;
 // functions
 	bool is_admissable();
 	void decompose();
@@ -40,6 +43,7 @@ private:
 	void accumulate_global_bottom();
 	void accumulate_global_left();
 	void accumulate_global_right();
+	void accumulate_global_inner();
 };
 
 #endif
