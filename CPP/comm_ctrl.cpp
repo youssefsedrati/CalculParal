@@ -27,3 +27,63 @@ void comm_ctrl::wait(){
 void comm_ctrl::compile_solution(){
 	
 }
+
+void comm_ctrl::compile_updates(){
+	
+}
+
+void comm_ctrl::compile_update_toBottom(){
+	
+}
+
+void comm_ctrl::compile_update_toTop(){
+	
+}
+
+void comm_ctrl::compile_update_toLeft(){
+	
+}
+
+void comm_ctrl::compile_update_toRight(){
+	
+}
+
+void comm_ctrl::send_updates(){
+	
+}
+
+void comm_ctrl::send_update_toBottom(){
+	
+}
+
+void comm_ctrl::send_update_toTop(){
+	
+}
+
+void comm_ctrl::send_update_toLeft(){
+	
+}
+
+void comm_ctrl::send_update_toRight(){
+	
+}
+
+void comm_ctrl::receive_updates(){
+	
+}
+
+void comm_ctrl::receive_update_Bottom(){
+	
+}
+
+void comm_ctrl::receive_update_Top(){
+	
+}
+
+void comm_ctrl::receive_update_Left(){
+	
+}
+
+void comm_ctrl::receive_update_Right(){
+	
+}

@@ -32,10 +32,10 @@ private:
 	void send_update_toLeft();
 	void send_update_toRight();
 	void receive_updates();
-	void receive_update_toBottom();
-	void receive_update_toTop();
-	void receive_update_toLeft();
-	void receive_update_toRight();
+	void receive_update_Bottom();
+	void receive_update_Top();
+	void receive_update_Left();
+	void receive_update_Right();
 };
 
 #endif
