@@ -19,11 +19,10 @@ private:
 	operator_matrix A;
 	decomposition *D;
 	double eps, dist, sigma;
-	double *RHS=NULL, *U=NULL,*Uit=NULL, *d=NULL, *W=NULL;
+	double *RHS=NULL, *U=NULL,*Uit=NULL;
 	int iterMax,iter, Nx,Ny,N;
 // MPI variables
-  int myrank=0, nb_procs,
-					firstline,lastline,first,last,start,end;
+  int myrank=0, nb_procs;
   //MPI_Status s1, s2;
   //MPI_Request r1, r2, r3, r4;
 // file operations

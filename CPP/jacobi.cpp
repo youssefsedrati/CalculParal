@@ -18,8 +18,6 @@ JacobiMethod::JacobiMethod(operator_matrix a,decomposition *dc,double *rhs,doubl
   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
   MPI_Comm_size(MPI_COMM_WORLD, &nb_procs);
   Uit = (double*) calloc(N,sizeof(double)); 
-  d   = (double*) calloc(N,sizeof(double));
-  W   = (double*) calloc(N,sizeof(double));
 }
 
 JacobiMethod::~JacobiMethod(){
@@ -159,6 +157,4 @@ void JacobiMethod::compute_gen_sol(){
 
 void JacobiMethod::cleanup(){
 	if(Uit) free(Uit);
-	if(d) free(d);
-	if(W) free(W);
 }
