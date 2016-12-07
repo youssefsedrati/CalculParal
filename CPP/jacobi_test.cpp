@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <stdlib.h>
+#include <mpi.h>
+
 #include "jacobi.h"
 #include "cdt_bords.h"
 #include "assert.h"
@@ -15,9 +17,14 @@ void RightHandSide(int N, int Nx, int M, double dx, double dy,
 				   double Cx, double Cy,double *RHS);
 
 int main(){
+  int myrank, nb_procs;
+	MPI_Init(NULL,NULL);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  MPI_Comm_size(MPI_COMM_WORLD, &nb_procs);
+	
   int Nx = 10,Ny =10,N = Nx*Ny, maxiter=1000;
 	double 	Lx = 1.,  Ly = 1., D =1., eps = 10e-7;
-	decomposition Dc(0, 1, 1, Nx, Ny);
+	decomposition Dc(myrank, nb_procs, 1, Nx, Ny);
 	operator_matrix A(Nx, Ny, Lx, Ly, D);
 					
   double *U,*Uold,*RHS;
@@ -26,7 +33,7 @@ int main(){
   RHS  = (double*) calloc(N,sizeof(double));
 	//RightHandSide(N, Nx, Ny, dx, dy, Cx, Cy, RHS);
 	for(int i=0;i<N;++i){
-		RHS[i] = 10;
+		RHS[i] = 1;
 		U[i] = 1.1;
 	}
 	/*int *idx = Dc.get_index_global();
@@ -38,6 +45,7 @@ int main(){
 	JacobiMethod J(A,&Dc,RHS,U);
 	J.compute(maxiter,eps);
 	J.save();
+	
 }
 
 int cdt_choisie= 1;

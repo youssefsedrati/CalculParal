@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-//#include <mpi.h>
+#include <mpi.h>
 #include "tools.h"
 #include "jacobi.h"
 #include "decomposition.h"
@@ -15,8 +15,8 @@ JacobiMethod::JacobiMethod(operator_matrix a,decomposition *dc,double *rhs,doubl
 	N  = D->get_myN();
 	Nx = D->get_myNx();
 	Ny = D->get_myNy(); 
-  //MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-  //MPI_Comm_size(MPI_COMM_WORLD, &nb_procs);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  MPI_Comm_size(MPI_COMM_WORLD, &nb_procs);
   Uit = (double*) calloc(N,sizeof(double)); 
   d   = (double*) calloc(N,sizeof(double));
   W   = (double*) calloc(N,sizeof(double));
@@ -46,7 +46,6 @@ void JacobiMethod::save(){
 
 // private
 void JacobiMethod::init(int itermax, double e){
-	//printf("init.\n");
 	iterMax = itermax; eps = e;
   iter = 1;
   dist = 1;
@@ -69,9 +68,7 @@ void JacobiMethod::init_sys(){
 }
 
 void JacobiMethod::compute_iterate(){	
-	//printf("compute.");
 	while( (iter<iterMax)&&(dist>eps*eps) ){
-		//printf("\n it: %d. ", iter);
 		if(iter%2) compute_alternate_update(Uit,U);
 		else compute_alternate_update(U,Uit);
 		dist= dist_squared(N,U,Uit);
@@ -151,14 +148,13 @@ double JacobiMethod::dist_squared(int N,double* U,double* V){
 }
 
 void JacobiMethod::compute_gen_sol(){
-	//printf("generate.\n");
 	if(iter%2)
 		for(int i=0;i<=N;++i) U[i]= Uit[i];
-		//MPI_Barrier(MPI_COMM_WORLD);
-  //if(myrank == 0){
+		MPI_Barrier(MPI_COMM_WORLD);
+  if(myrank == 0){
     printf("Jacobi method terminated after"
            " %d iterations, squared_dist= %0.31f\n", iter-1,dist);
-  //}
+  }
 }
 
 void JacobiMethod::cleanup(){

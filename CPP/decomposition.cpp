@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "decomposition.h"
 
 decomposition::decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, int ny){
@@ -83,16 +84,15 @@ void decomposition::decompose(){
 }
 
 void decomposition::decompose_x(){
-	int begin = myRank_x*Nx/N_procs_x;
-	if(N_procs_x==1) 
-		myNx = Nx;
-	else 
-		if(myRank_x+1==N_procs_x) myNx = Nx-begin;
-	else
-		myNx = 1+Nx/N_procs_x;
-	if((begin*N_procs_x==myRank_x*Nx) && (myRank_x>0) && (myRank_x+1<N_procs_x)){
+	int step = Nx/N_procs_x,
+			carryover = Nx-N_procs_x*step,
+			carryover_start = N_procs_x - carryover,
+			begin = myRank_x*step;
+	if(myRank_x==0) begin = 0;
+	myNx = step;
+	if(myRank_x+1>carryover_start){
 		myNx++;
-		begin--;
+		begin = (carryover_start)*step+myNx*(myRank_x-carryover_start);
 	}
 	index_x = (int*) malloc(myNx*sizeof(int));
 	for(int i=0;i<myNx;++i){
@@ -101,16 +101,15 @@ void decomposition::decompose_x(){
 }
 
 void decomposition::decompose_y(){
-	int begin = myRank_y*Ny/N_procs_y;
-	if(N_procs_y==1) 
-		myNy = Ny;
-	else 
-		if(myRank_y+1==N_procs_y) myNy = Ny-begin;
-	else
-		myNy = 1+Ny/N_procs_y;
-	if((begin*N_procs_y==myRank_y*Ny) && (myRank_y>0) && (myRank_y+1<N_procs_y)){
+	int step = Ny/N_procs_y,
+			carryover = Ny-N_procs_y*step,
+			carryover_start = N_procs_y - carryover,
+			begin = myRank_y*step;
+	if(myRank_y==0) begin = 0;
+	myNy = step;
+	if(myRank_y+1>carryover_start){
 		myNy++;
-		begin--;
+		begin = (carryover_start)*step+myNy*(myRank_y-carryover_start);
 	}
 	index_y = (int*) malloc(myNy*sizeof(int));
 	for(int i=0;i<myNy;++i){
