@@ -6,18 +6,20 @@
 #include <string>
 #include "operator_matrix.h"
 #include "decomposition.h"
+#include "comm_ctrl.h"
 
 class JacobiMethod{
 public:
 	JacobiMethod();
-	JacobiMethod(operator_matrix a,decomposition *dc,double *rhs,double *u);
+	JacobiMethod(operator_matrix *a,decomposition *dc,double *rhs,double *u,comm_ctrl *c);
 	~JacobiMethod();
 	void compute(int itermax,double e);
 	void save();
 private:
 // system variables
-	operator_matrix A;
+	operator_matrix *A;
 	decomposition *D;
+	comm_ctrl *C;
 	double eps, dist, sigma;
 	double *RHS=NULL,*RHSit=NULL,*U=NULL,*Uit=NULL;
 	int iterMax,iter, Nx,Ny,N;

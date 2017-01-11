@@ -4,21 +4,26 @@
 #include <stdlib.h>
 #include <mpi.h>
 #include "decomposition.h"
+#include "operator_matrix.h"
 
 class comm_ctrl{
 public: 
-	comm_ctrl(decomposition *d, double *rhs, double *rhs_up, double *u, double *U_up, 
-						int bottomrank, int toprank, int leftrank, int rightrank);
+	comm_ctrl(decomposition *d, operator_matrix *a,
+						double *rhs, double *rhs_up, double *u, double *U_up);
 	~comm_ctrl();
 	void send();
 	void receive();
 	void compile_solution();
 private:
 	int myRank, bottomRank, topRank, leftRank, rightRank;
+	bool am_I_in_rootGroup, is_myGroup_waiting;
 	decomposition *D;
+	operator_matrix *A;
 	double *RHS, *RHS_up, *U, *u_up;
 	MPI_Status mpi_stat;
 //
+	void init_neighbour_ranks();
+	void init_group_behaviour();
 	void send_updates();
 	void send_update_toBottom();
 	void send_update_toTop();

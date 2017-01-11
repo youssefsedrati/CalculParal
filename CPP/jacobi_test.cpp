@@ -8,6 +8,7 @@
 #include "assert.h"
 #include "decomposition.h"
 #include "operator_matrix.h"
+#include "comm_ctrl.h"
 
 using namespace std;
 
@@ -26,23 +27,17 @@ int main(){
 	double 	Lx = 1.,  Ly = 1., D =1., eps = 10e-7;
 	decomposition Dc(myrank, nb_procs, 1, Nx, Ny);
 	operator_matrix A(Nx, Ny, Lx, Ly, D);
+	comm_ctrl C(decomposition *d, double *rhs, double *rhs_up, double *u, double *U_up, 
+						int bottomrank, int toprank, int leftrank, int rightrank);
 					
-  double *U,*Uold,*RHS;
+  double *U,*RHS;
 	U    = (double*) calloc(N,sizeof(double)); 
-  Uold = (double*) calloc(N,sizeof(double));
   RHS  = (double*) calloc(N,sizeof(double));
-	//RightHandSide(N, Nx, Ny, dx, dy, Cx, Cy, RHS);
 	for(int i=0;i<N;++i){
 		RHS[i] = 1;
 		U[i] = 1.1;
 	}
-	/*int *idx = Dc.get_index_global();
-	for(int i=0;i<Nx;++i){
-		for(int j=0;j<Ny;++j)
-			cout << idx[i+j*(Nx)] <<" ";
-		cout << endl;
-	}*/
-	JacobiMethod J(A,&Dc,RHS,U);
+	JacobiMethod J(&A,&Dc,RHS,U);
 	J.compute(maxiter,eps);
 	J.save();
 	

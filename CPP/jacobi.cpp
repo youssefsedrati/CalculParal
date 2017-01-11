@@ -6,18 +6,18 @@
 #include "jacobi.h"
 #include "decomposition.h"
 #include "operator_matrix.h"
+#include "comm_ctrl.h"
 
 using namespace std;
 
 // constructor & destructor
-JacobiMethod::JacobiMethod(operator_matrix a,decomposition *dc,double *rhs,double *u){
-	A = a; D = dc; RHS = rhs; U = u; 
+JacobiMethod::JacobiMethod(operator_matrix *a,decomposition *dc,double *rhs,double *u,comm_ctrl *c){
+	A = a; D = dc; RHS = rhs; U = u; C = c;
 	N  = D->get_myN();
 	Nx = D->get_myNx();
 	Ny = D->get_myNy(); 
-  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-  MPI_Comm_size(MPI_COMM_WORLD, &nb_procs);
-  Uit = (double*) calloc(N,sizeof(double)); 
+  Uit = (double*) malloc(N*sizeof(double)); 
+	RHSit =(double*) malloc(N*sizeof(double));
 }
 
 JacobiMethod::~JacobiMethod(){
@@ -51,24 +51,24 @@ void JacobiMethod::init(int itermax, double e){
 	init_sys();
 }
 
-void JacobiMethod::init_MPI(){
-  firstline = myrank*Ny/nb_procs+1;
-  lastline = (myrank+1)*Ny/nb_procs;
-  if(myrank == nb_procs-1) lastline = Ny;
-
-  first = (firstline-1) * Nx + 1;
-  last = lastline * Nx;	
+void JacobiMethod::init_MPI(){	
+  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  MPI_Comm_size(MPI_COMM_WORLD, &nb_procs);
 }
 
 void JacobiMethod::init_sys(){
-	for(int i = 0 ; i<=N ; i++) 
+	for(int i = 0 ; i<=N ; i++){
 		Uit[i] = U[i];	
+		RHSit[i] = RHS[i];
+	}
 }
 
 void JacobiMethod::compute_iterate(){	
 	while( (iter<iterMax)&&(dist>eps*eps) ){
+		C->receive(); // eventually wait until all processors have sent
 		if(iter%2) compute_alternate_update(Uit,U);
 		else compute_alternate_update(U,Uit);
+		C->send(); // eventually wait until all processors have received
 		dist= dist_squared(N,U,Uit);
 		iter+=1;
 	}
@@ -86,34 +86,34 @@ void JacobiMethod::compute_alternate_update_inner(double* U, double* Unew){
 	int *idx = D->get_index_global_inner();
 	for(int j=0;j<D->get_myNinner();++j){
 		int i = idx[j];
-		sigma = A.Cx()*U[i-1]+A.Cx()*U[i+1]+A.Cy()*U[i-Ny]+A.Cy()*U[i+Ny];
-		Unew[i]= (RHS[i]-sigma)/A.Aii();
+		sigma = A->Cx()*U[i-1]+A->Cx()*U[i+1]+A->Cy()*U[i-Ny]+A->Cy()*U[i+Ny];
+		Unew[i]= (RHS[i]-sigma)/A->Aii();
 	}	
 }
 
 void JacobiMethod::compute_alternate_update_left(double* U, double* Unew){
 	int i,*idx = D->get_index_global_left();
 	i = idx[0];
-	Unew[i] = (RHS[i]-A.Cx()*U[i+1]-A.Cy()*U[i+Ny])/A.Aii();
+	Unew[i] = (RHS[i]-A->Cx()*U[i+1]-A->Cy()*U[i+Ny])/A->Aii();
 	i = idx[D->get_myNy()-1];	
-	Unew[i] = (RHS[i]-A.Cx()*U[i+1]-A.Cy()*U[i-Ny])/A.Aii();
+	Unew[i] = (RHS[i]-A->Cx()*U[i+1]-A->Cy()*U[i-Ny])/A->Aii();
 	for(int j=1;j<D->get_myNy()-1;++j){
 		i = idx[j];
-		sigma = A.Cx()*U[i+1]+A.Cy()*U[i-Ny]+A.Cy()*U[i+Ny];
-		Unew[i]= (RHS[i]-sigma)/A.Aii();
+		sigma = A->Cx()*U[i+1]+A->Cy()*U[i-Ny]+A->Cy()*U[i+Ny];
+		Unew[i]= (RHS[i]-sigma)/A->Aii();
 	}
 }
 
 void JacobiMethod::compute_alternate_update_right(double* U, double* Unew){
 	int i,*idx = D->get_index_global_right();
 	i = idx[0];
-	Unew[i] = (RHS[i]-A.Cx()*U[i-1]-A.Cy()*U[i+Ny])/A.Aii();
+	Unew[i] = (RHS[i]-A->Cx()*U[i-1]-A->Cy()*U[i+Ny])/A->Aii();
 	i = idx[D->get_myNy()-1];	
-	Unew[i] = (RHS[i]-A.Cx()*U[i-1]-A.Cy()*U[i-Ny])/A.Aii();
+	Unew[i] = (RHS[i]-A->Cx()*U[i-1]-A->Cy()*U[i-Ny])/A->Aii();
 	for(int j=1;j<D->get_myNy()-1;++j){
 		i = idx[j];
-		sigma = A.Cx()*U[i-1]+A.Cy()*U[i-Ny]+A.Cy()*U[i+Ny];
-		Unew[i]= (RHS[i]-sigma)/A.Aii();
+		sigma = A->Cx()*U[i-1]+A->Cy()*U[i-Ny]+A->Cy()*U[i+Ny];
+		Unew[i]= (RHS[i]-sigma)/A->Aii();
 	}	
 }
 
@@ -121,8 +121,8 @@ void JacobiMethod::compute_alternate_update_bottom(double* U, double* Unew){
 	int *idx = D->get_index_global_bottom();
 	for(int j=1;j<D->get_myNx()-1;++j){
 		int i = idx[j];
-		sigma = A.Cx()*U[i-1]+A.Cx()*U[i+1]+A.Cy()*U[i+Ny];
-		Unew[i]= (RHS[i]-sigma)/A.Aii();
+		sigma = A->Cx()*U[i-1]+A->Cx()*U[i+1]+A->Cy()*U[i+Ny];
+		Unew[i]= (RHS[i]-sigma)/A->Aii();
 	}
 }
 
@@ -130,8 +130,8 @@ void JacobiMethod::compute_alternate_update_top(double* U, double* Unew){
 	int *idx = D->get_index_global_top();
 	for(int j=1;j<D->get_myNx()-1;++j){
 		int i = idx[j];
-		sigma = A.Cx()*U[i-1]+A.Cx()*U[i+1]+A.Cy()*U[i-Ny];
-		Unew[i]= (RHS[i]-sigma)/A.Aii();
+		sigma = A->Cx()*U[i-1]+A->Cx()*U[i+1]+A->Cy()*U[i-Ny];
+		Unew[i]= (RHS[i]-sigma)/A->Aii();
 	}	
 }
 
@@ -148,7 +148,8 @@ double JacobiMethod::dist_squared(int N,double* U,double* V){
 void JacobiMethod::compute_gen_sol(){
 	if(iter%2)
 		for(int i=0;i<=N;++i) U[i]= Uit[i];
-		MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
+	C->compile_solution();
   if(myrank == 0){
     printf("Jacobi method terminated after"
            " %d iterations, squared_dist= %0.31f\n", iter-1,dist);

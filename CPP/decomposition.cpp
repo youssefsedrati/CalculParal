@@ -73,6 +73,38 @@ int decomposition::get_myNinner(){
 	return myNinner;
 }
 
+int decomposition::get_myRank_x(){
+	return myRank_x;
+}
+
+int decomposition::get_myRank_y(){
+	return myRank_y;
+}
+	
+int decomposition::get_Nx(){
+	return Nx;
+}
+
+int decomposition::get_Ny(){
+	return Ny;
+}
+
+int decomposition::get_N(){
+	return N;
+}
+
+int decomposition::get_N_procs(){
+	return N_procs;
+}
+
+int decomposition::get_N_procs_x(){
+	return N_procs_x;
+}
+
+int decomposition::get_N_procs_y(){
+	return N_procs_y;
+}
+
 bool decomposition::is_admissable(){
 	return( (N_procs>0)&&(N_procs_x>0)&&(myRank<N_procs)&&(N_procs_x*N_procs_y==N_procs) );
 }

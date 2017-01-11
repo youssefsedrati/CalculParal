@@ -23,6 +23,14 @@ public:
 	int get_myNy();
 	int get_myN();
 	int get_myNinner();
+	int get_myRank_x();
+	int get_myRank_y();
+	int get_Nx();
+	int get_Ny();
+	int get_N();
+	int get_N_procs();
+	int get_N_procs_x();
+	int get_N_procs_y();
 private:
 	int *index_x=NULL, *index_y=NULL, *index_global=NULL,
 			*index_global_top=NULL, *index_global_bottom=NULL, 
