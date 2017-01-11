@@ -1,6 +1,11 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
+#include <iostream>
+#include <fstream>
+#include <string>
+#include "operator_matrix.h"
+#include "decomposition.h"
 
 #define MAX(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -45,8 +50,8 @@ void RightHandSide(int N, int Nx, int M, double dx, double dy,
 !          .   .   .
 !              Cx Aii
 */
-void matvec(double Aii,double Cx,double Cy,int Nx,int Ny,double *Uold,double *U);
-
+//void matvec(double Aii,double Cx,double Cy,int Nx,int Ny,double *Uold,double *U);
+void matvec(operator_matrix a , decomposition *D, double *Uold,double *U);
 /** returns the square l2-distance of two parsed vectors of length N+1
 	*/
 double dist_squared(int N,double* U,double* V);

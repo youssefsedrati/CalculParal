@@ -1,19 +1,25 @@
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <mpi.h>
-#include "conjgrad.h"
 #include "tools.h"
+#include "conjgrad.h"
+#include "decomposition.h"
+#include "operator_matrix.h"
 
 // constructor & destructor
-CGmethod::CGmethod(double aii,double cx,double cy,int nx,int n,double *rhs,double *u){
-	Aii = aii; Cx = cx; Cy = cy; Nx = nx; N = n; RHS = rhs; U = u; Ny = N/Nx;
+CGmethod::CGmethod(operator_matrix a, decomposition *dc, double *rhs,double *u){
+	//Aii = aii; Cx = cx; Cy = cy; Nx = nx; N = n;
+	A = a; D = dc; RHS = rhs; U = u; 
+	N  = D->get_myN();
+	Nx = D->get_myNx();
+	Ny = D->get_myNy(); 
   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
   MPI_Comm_size(MPI_COMM_WORLD, &nb_procs);
 }
 
 CGmethod::~CGmethod(){
-	cleanup();
+	//cleanup();
 }
 // public
 void CGmethod::compute(int itermax, double e){
@@ -49,7 +55,8 @@ void CGmethod::init_sys(){
 	for (int i=deb;i<fin;i++ ){
     kappa[i] = U[i];
   }
-  matvec(Aii,Cx,Cy,Nx,Ny,kappa,r);
+  // Problème avec matvec.
+  matvec(A,D,kappa,r);
 
   for(int i=fst;i<=lst;i++){
     r[i]     = r[i] - RHS[i];
@@ -98,7 +105,8 @@ void CGmethod::compute_comm_main(){
 }
 
 void CGmethod::compute_calc_pre(){
-	matvec(Aii,Cx,Cy,Nx,Ny,d,W);
+
+	matvec(A,D,d,W);
 	drl = 0.0;
 	dwl = 0.0;
 	for(int i=fst; i<=lst; i++ ){

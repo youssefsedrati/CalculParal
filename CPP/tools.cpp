@@ -85,58 +85,58 @@ void RightHandSide(int N, int Nx, int M, double dx, double dy, double Cx, double
   RHS[N] = RHS[N] -h(1.0,k*dy,0.0)*Cx;
 }
 
-void matvec(double Aii,double Cx,double Cy,int Nx,int Ny,double *Uold,double *U){
+void matvec(operator_matrix a, decomposition *D, double *Uold, double *U){
   int     i,j,k;
   int myrank;
   int nb_procs;
   MPI_Comm_size(MPI_COMM_WORLD, &nb_procs);
   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
-  int fst_line = myrank*Ny/nb_procs+1;
-  int lst_line = (myrank+1)*Ny/nb_procs;
+  int fst_line = myrank* D->get_myNy()/nb_procs+1;
+  int lst_line = (myrank+1)* D->get_myNy()/nb_procs;
   if(myrank == nb_procs-1)
-    lst_line = Ny;
+    lst_line = D->get_myNy();
 
-  int fst_elt = (fst_line-1) * Nx + 1;
+  int fst_elt = (fst_line-1) * D->get_myNx() + 1;
   i = fst_elt;
-
+  // Je suppose pas de problème avant cette ligne
   if(fst_line == 1){
 /*Premier bloc*/
-    U[1] = Aii*Uold[1] + Cx*Uold[2] + Cy*Uold[1+Nx];
+    U[1] = a.Aii()*Uold[1] + a.Cx()*Uold[2] + a.Cy()*Uold[1+ D->get_myNx()];
     i = 1;
-    for( j = 1;j<= Nx-2;j++ ){
+    for( j = 1;j<= D->get_myNx()-2;j++ ){
       i = 1+j;
-      U[i] = Aii*Uold[i] + Cx*Uold[i-1] + Cx*Uold[i+1] + Cy*Uold[i+Nx];
+      U[i] = a.Aii()*Uold[i] + a.Cx()*Uold[i-1] + a.Cx()*Uold[i+1] + a.Cy()*Uold[i+D->get_myNx()];
     }
-    U[1+(Nx-1)] = Aii*Uold[1+(Nx-1)] + Cx*Uold[1+(Nx-1)-1] + Cy*Uold[1+(Nx-1)+Nx];
-    i = 1 + (Nx-1);
+    U[1+(D->get_myNx()-1)] = a.Aii()*Uold[1+(D->get_myNx()-1)] + a.Cx()*Uold[1+(D->get_myNx()-1)-1] + a.Cy()*Uold[1+(D->get_myNx()-1)+D->get_myNx()];
+    i = 1 + (D->get_myNx()-1);
   }
 /*bloc general, il y a m-2 blocs generaux */
-  for( k = fst_line; k<= MIN(Ny-1, lst_line); k++){
+  for( k = fst_line; k<= MIN(D->get_myNy()-1, lst_line); k++){
     if(k!=1){ /* First line already done */
 /*Premiere ligne*/
-      i = (k-1)*Nx+1;
-      U[i] = Aii*Uold[i] + Cx*Uold[i+1] + Cy*Uold[i-Nx] + Cy*Uold[i+Nx] ;
+      i = (k-1)* D->get_myNx()+1;
+      U[i] = a.Aii()*Uold[i] + a.Cx()*Uold[i+1] + a.Cy()*Uold[i- D->get_myNx()] + a.Cy()*Uold[i+ D->get_myNx()];
 /*ligne generale*/
-      for( j = 1;j<= Nx-2;j++){
+      for( j = 1;j<= D->get_myNx() -2;j++){
         i = i+1;
-        U[i] = Aii*Uold[i] + Cx*Uold[i-1] + Cx*Uold[i+1] + Cy*Uold[i+Nx] + Cy*Uold[i-Nx];
+        U[i] = a.Aii()*Uold[i] + a.Cx()*Uold[i-1] + a.Cx()*Uold[i+1] + a.Cy()*Uold[i+ D->get_myNx()] + a.Cy()*Uold[i- D->get_myNx()];
       }
 /*Derniere ligne*/
       i = i + 1;
-      U[i] = Aii*Uold[i] + Cx*Uold[i-1] + Cy*Uold[i-Nx] + Cy*Uold[i+Nx];
+      U[i] = a.Aii()*Uold[i] + a.Cx()*Uold[i-1] + a.Cy()*Uold[i- D->get_myNx()] + a.Cy()*Uold[i+ D->get_myNx()];
     }
   }
   i = i+1;
-  if(lst_line == Ny){
+  if(lst_line == D->get_myNy()){
 /*Dernier bloc*/
-    U[i] = Aii*Uold[i] + Cx*Uold[i+1] + Cy*Uold[i-Nx];
-    for( j = 1;j<= Nx-2;j++){
+    U[i] = a.Aii()*Uold[i] + a.Cx()*Uold[i+1] + a.Cy()*Uold[i- D->get_myNx()];
+    for( j = 1;j<= D->get_myNx()-2;j++){
       i = i+1;
-      U[i] = Aii*Uold[i] + Cx*Uold[i+1] + Cx*Uold[i-1] + Cy*Uold[i-Nx];
+      U[i] = a.Aii()*Uold[i] + a.Cx()*Uold[i+1] + a.Cx()*Uold[i-1] + a.Cy()*Uold[i- D->get_myNx()];
     }
     i = i+1;
-    U[i] = Aii*Uold[i] + Cx*Uold[i-1] + Cy*Uold[i-Nx];
+    U[i] = a.Aii()*Uold[i] + a.Cx()*Uold[i-1] + a.Cy()*Uold[i- D->get_myNx()];
   }
 }
 
