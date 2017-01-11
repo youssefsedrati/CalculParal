@@ -19,7 +19,7 @@ private:
 	operator_matrix A;
 	decomposition *D;
 	double eps, dist, sigma;
-	double *RHS=NULL, *U=NULL,*Uit=NULL;
+	double *RHS=NULL,*RHSit=NULL,*U=NULL,*Uit=NULL;
 	int iterMax,iter, Nx,Ny,N;
 // MPI variables
   int myrank=0, nb_procs;
