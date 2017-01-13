@@ -26,6 +26,10 @@ void comm_ctrl::compile_solution(){
 	MPI_Allreduce(MPI_IN_PLACE, U, D->get_N(), MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 }
 
+void comm_ctrl::cumulate_dist_squared(double *dsq){	
+	MPI_Allreduce(MPI_IN_PLACE, dsq, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+}
+
 void comm_ctrl::init_neighbour_ranks(){	
   MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 	bottomRank= (D->get_myRank_y()>0) 									? myRank - D->get_N_procs_x() : -1; 

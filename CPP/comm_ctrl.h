@@ -18,6 +18,7 @@ public:
 	void send();
 	void receive();
 	void compile_solution();
+	void cumulate_dist_squared(double* dsq);
 private:
 	int myRank, bottomRank, topRank, leftRank, rightRank;
 	bool am_I_in_rootGroup, is_myGroup_waiting;

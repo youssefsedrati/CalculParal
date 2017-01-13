@@ -50,7 +50,7 @@ void JacobiMethod::save(){
 // private
 void JacobiMethod::init(int itermax, double e){
 	iterMax = itermax; eps = e;
-  iter = dist = 1;
+  iter = dist_squared = 1;
 	init_MPI();
 	init_sys();
 }
@@ -61,7 +61,6 @@ void JacobiMethod::init_MPI(){
 }
 
 void JacobiMethod::init_sys(){
-	cout << "#" << myRank << ". " << D->get_N() << endl;
 	for(int i=0;i<D->get_N();++i){
 		Uit[i] = U[i];	
 		RHSit[i] = RHS[i];
@@ -69,12 +68,13 @@ void JacobiMethod::init_sys(){
 }
 
 void JacobiMethod::compute_iterate(){	
-	while( (iter<iterMax)&&(dist>eps*eps) ){
+	while( (iter<iterMax)&&(dist_squared>eps*eps) ){
 		C->receive(); // eventually wait until all processors have sent
 		if(iter%2) compute_alternate_update(Uit,U);
 		else compute_alternate_update(U,Uit);
 		C->send(); // eventually wait until all processors have received
-		dist= dist_squared(N,U,Uit);
+		compute_dist_squared();
+		C->cumulate_dist_squared(&dist_squared);
 		iter+=1;
 	}
 }
@@ -140,14 +140,14 @@ void JacobiMethod::compute_alternate_update_top(double* U, double* Unew){
 	}	
 }
 
-double JacobiMethod::dist_squared(int N,double* U,double* V){
-	double D = 0, Di;
-	int i;
-	for(i=0;i<N;++i){
-		Di= U[i]-V[i];
-		D+= Di*Di;
+void JacobiMethod::compute_dist_squared(){
+	double Di; dist_squared=0;
+	int *idx = D->get_index_global();
+	for(int i=0;i<D->get_myN();++i){
+		int j = idx[i];
+		Di= U[j]-Uit[j];
+		dist_squared+= Di*Di;
 	}
-	return D;
 }
 
 void JacobiMethod::compute_gen_sol(){
@@ -157,7 +157,7 @@ void JacobiMethod::compute_gen_sol(){
 	C->compile_solution();
   if(myRank == 0){
     printf("Jacobi method terminated after"
-           " %d iterations, squared_dist= %0.31f\n", iter-1,sqrt(dist));
+           " %d iterations, squared_dist= %0.31f\n", iter-1,sqrt(dist_squared));
   }
 }
 
