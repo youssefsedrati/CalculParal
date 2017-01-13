@@ -1,8 +1,12 @@
 #ifndef COMM_CTRL
 #define COMM_CTRL
 
+
 #include <stdlib.h>
+#include <stdio.h>
+#include <iostream>
 #include <mpi.h>
+
 #include "decomposition.h"
 #include "operator_matrix.h"
 

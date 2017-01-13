@@ -1,10 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
 #include "decomposition.h"
 
 decomposition::decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, int ny){
 	myRank = myrank; N_procs = nb_procs; N_procs_x = nb_procs_x; N_procs_y = N_procs/N_procs_x;
-	Nx = nx; Ny = ny;
+	Nx = nx; Ny = ny; N = Nx*Ny;
 	if(is_admissable()){
 		myRank_x = myRank%N_procs_x;
 		myRank_y = (myRank-myRank_x)/N_procs_x;
@@ -12,6 +13,7 @@ decomposition::decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, i
 		accumulate_global_borders();
 		accumulate_global_inner();
 	}
+	else std::cout << "Error: decomposition for #" << myrank << " is not admissable.\n";
 }
 
 decomposition::~decomposition(){
@@ -190,7 +192,8 @@ void decomposition::accumulate_global_right(){
 }
 
 void decomposition::accumulate_global_inner(){
-	myNinner = (myNx-2)*(myNx-2);
+	myNinner = (myNx-2)*(myNy-2);
+	if(myNinner<1) return;
 	index_global_inner = (int*) malloc(myNinner*sizeof(int));
 	for(int i=1;i<myNx-1;++i)
 		for(int j=1;j<myNy-1;++j)

@@ -11,7 +11,8 @@
 class JacobiMethod{
 public:
 	JacobiMethod();
-	JacobiMethod(operator_matrix *a,decomposition *dc,double *rhs,double *u);
+	JacobiMethod(operator_matrix *a,decomposition *dc,
+				double *rhs, double *u);
 	~JacobiMethod();
 	void compute(int itermax,double e);
 	void save();
@@ -24,7 +25,7 @@ private:
 	double *RHS=NULL,*RHSit=NULL,*U=NULL,*Uit=NULL;
 	int iterMax,iter, Nx,Ny,N;
 // MPI variables
-  int myrank=0, nb_procs;
+  int myRank, nOfProcs;
   //MPI_Status s1, s2;
   //MPI_Request r1, r2, r3, r4;
 // file operations
