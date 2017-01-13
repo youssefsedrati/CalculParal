@@ -11,7 +11,7 @@
 class JacobiMethod{
 public:
 	JacobiMethod();
-	JacobiMethod(operator_matrix *a,decomposition *dc,double *rhs,double *u,comm_ctrl *c);
+	JacobiMethod(operator_matrix *a,decomposition *dc,double *rhs,double *u);
 	~JacobiMethod();
 	void compute(int itermax,double e);
 	void save();

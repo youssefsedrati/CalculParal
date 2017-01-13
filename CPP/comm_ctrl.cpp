@@ -96,20 +96,22 @@ void comm_ctrl::receive_updates(){
 void comm_ctrl::receive_update_fromBottom(){
 	if(bottomRank<0) return;
 	MPI_Recv(u_up, D->get_myN(), MPI_DOUBLE, bottomRank, 200, MPI_COMM_WORLD, &mpi_stat);
-	int *idx = D->get_index_global_bottom();
+	int *idx = D->get_index_global_bottom(),
+			offset = D->get_myNx();
 	for(size_t i=0;i<D->get_myNx();++i){
 		int j = idx[i];
-		RHS_up[j] = RHS[j] - A->Cy() * u_up[j - D->get_myNx()]; 
+		RHS_up[j] = RHS[j] - A->Cy() * u_up[j - offset]; 
 	}
 }
 
 void comm_ctrl::receive_update_fromTop(){
 	if(topRank<0) return;
 	MPI_Recv(u_up, D->get_myN(), MPI_DOUBLE, topRank, 100, MPI_COMM_WORLD, &mpi_stat);
-	int *idx = D->get_index_global_top();
+	int *idx = D->get_index_global_top(),
+			offset = D->get_myNx();
 	for(size_t i=0;i<D->get_myNx();++i){
 		int j = idx[i];
-		RHS_up[j] = RHS[j] - A->Cy() * u_up[j + D->get_myNx()]; 
+		RHS_up[j] = RHS[j] - A->Cy() * u_up[j + offset]; 
 	}
 }
 

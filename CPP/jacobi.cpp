@@ -11,22 +11,24 @@
 using namespace std;
 
 // constructor & destructor
-JacobiMethod::JacobiMethod(operator_matrix *a,decomposition *dc,double *rhs,double *u,comm_ctrl *c){
-	A = a; D = dc; RHS = rhs; U = u; C = c;
+JacobiMethod::JacobiMethod(operator_matrix *a,decomposition *dc,double *rhs,double *u){
+	A = a; D = dc; RHS = rhs; U = u;
 	N  = D->get_myN();
 	Nx = D->get_myNx();
 	Ny = D->get_myNy(); 
   Uit = (double*) malloc(N*sizeof(double)); 
 	RHSit =(double*) malloc(N*sizeof(double));
+	C = new comm_ctrl(D,A,RHS,RHSit,U,Uit);
 }
 
 JacobiMethod::~JacobiMethod(){
 	//cleanup();
+	delete C;
 }
 // public
 void JacobiMethod::compute(int itermax, double e){
 	init(itermax,e);
-	compute_iterate();
+	compute_iterate();	
 	compute_gen_sol();
 }
 
@@ -87,33 +89,33 @@ void JacobiMethod::compute_alternate_update_inner(double* U, double* Unew){
 	for(int j=0;j<D->get_myNinner();++j){
 		int i = idx[j];
 		sigma = A->Cx()*U[i-1]+A->Cx()*U[i+1]+A->Cy()*U[i-Ny]+A->Cy()*U[i+Ny];
-		Unew[i]= (RHS[i]-sigma)/A->Aii();
+		Unew[i]= (RHSit[i]-sigma)/A->Aii();
 	}	
 }
 
 void JacobiMethod::compute_alternate_update_left(double* U, double* Unew){
 	int i,*idx = D->get_index_global_left();
 	i = idx[0];
-	Unew[i] = (RHS[i]-A->Cx()*U[i+1]-A->Cy()*U[i+Ny])/A->Aii();
+	Unew[i] = (RHSit[i]-A->Cx()*U[i+1]-A->Cy()*U[i+Ny])/A->Aii();
 	i = idx[D->get_myNy()-1];	
-	Unew[i] = (RHS[i]-A->Cx()*U[i+1]-A->Cy()*U[i-Ny])/A->Aii();
+	Unew[i] = (RHSit[i]-A->Cx()*U[i+1]-A->Cy()*U[i-Ny])/A->Aii();
 	for(int j=1;j<D->get_myNy()-1;++j){
 		i = idx[j];
 		sigma = A->Cx()*U[i+1]+A->Cy()*U[i-Ny]+A->Cy()*U[i+Ny];
-		Unew[i]= (RHS[i]-sigma)/A->Aii();
+		Unew[i]= (RHSit[i]-sigma)/A->Aii();
 	}
 }
 
 void JacobiMethod::compute_alternate_update_right(double* U, double* Unew){
 	int i,*idx = D->get_index_global_right();
 	i = idx[0];
-	Unew[i] = (RHS[i]-A->Cx()*U[i-1]-A->Cy()*U[i+Ny])/A->Aii();
+	Unew[i] = (RHSit[i]-A->Cx()*U[i-1]-A->Cy()*U[i+Ny])/A->Aii();
 	i = idx[D->get_myNy()-1];	
-	Unew[i] = (RHS[i]-A->Cx()*U[i-1]-A->Cy()*U[i-Ny])/A->Aii();
+	Unew[i] = (RHSit[i]-A->Cx()*U[i-1]-A->Cy()*U[i-Ny])/A->Aii();
 	for(int j=1;j<D->get_myNy()-1;++j){
 		i = idx[j];
 		sigma = A->Cx()*U[i-1]+A->Cy()*U[i-Ny]+A->Cy()*U[i+Ny];
-		Unew[i]= (RHS[i]-sigma)/A->Aii();
+		Unew[i]= (RHSit[i]-sigma)/A->Aii();
 	}	
 }
 
@@ -122,7 +124,7 @@ void JacobiMethod::compute_alternate_update_bottom(double* U, double* Unew){
 	for(int j=1;j<D->get_myNx()-1;++j){
 		int i = idx[j];
 		sigma = A->Cx()*U[i-1]+A->Cx()*U[i+1]+A->Cy()*U[i+Ny];
-		Unew[i]= (RHS[i]-sigma)/A->Aii();
+		Unew[i]= (RHSit[i]-sigma)/A->Aii();
 	}
 }
 
@@ -131,7 +133,7 @@ void JacobiMethod::compute_alternate_update_top(double* U, double* Unew){
 	for(int j=1;j<D->get_myNx()-1;++j){
 		int i = idx[j];
 		sigma = A->Cx()*U[i-1]+A->Cx()*U[i+1]+A->Cy()*U[i-Ny];
-		Unew[i]= (RHS[i]-sigma)/A->Aii();
+		Unew[i]= (RHSit[i]-sigma)/A->Aii();
 	}	
 }
 
