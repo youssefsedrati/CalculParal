@@ -15,7 +15,7 @@ int main(){
   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
   MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
 	
-  int Nx = 10,Ny =10,N = Nx*Ny, maxiter=1000;
+  int Nx = 12,Ny =10,N = Nx*Ny, maxiter=10000;
 	double 	Lx = 1.,  Ly = 1., D =1., eps = 10e-10;
 	
 	decomposition Dc(myrank, n_procs, 1, Nx, Ny);

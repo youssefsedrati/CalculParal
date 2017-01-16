@@ -1,8 +1,8 @@
 #include "operator_matrix.h"
 
 operator_matrix::operator_matrix(int Nx, int Ny, double Lx, double Ly, double D){
-	dx  = Lx/(2 + Nx);
-	dy  = Ly/(2 + Ny);
+	dx  = Lx/(1 + Nx);
+	dy  = Ly/(1 + Ny);
 	_Aii = 2.0*D/(dx*dx)+ 2.0*D/(dy*dy);
 	_Cx  = -1.0*D/(dx*dx);
 	_Cy  = -1.0*D/(dy*dy);

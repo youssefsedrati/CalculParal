@@ -36,7 +36,6 @@ void comm_ctrl::init_neighbour_ranks(){
 	topRank= (D->get_myRank_y()<D->get_N_procs_y()-1) 	? myRank + D->get_N_procs_x() : -1; 
 	leftRank= (D->get_myRank_x()>0) 										? myRank-1 : -1; 
 	rightRank= (D->get_myRank_x()<D->get_N_procs_x()-1) ? myRank+1 : -1;
-	//std::cout << "#" << myRank << ". v " << bottomRank << ". ^ " << topRank << ". < " << leftRank << ". > " << rightRank << ".\n";
 }
 
 void comm_ctrl::init_group_behaviour(){

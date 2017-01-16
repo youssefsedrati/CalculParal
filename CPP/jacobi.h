@@ -23,7 +23,7 @@ private:
 	comm_ctrl *C;
 	double eps, dist_squared, sigma;
 	double *RHS=NULL,*RHSit=NULL,*U=NULL,*Uit=NULL;
-	int iterMax,iter, Nx,Ny,N;
+	int iterMax,iter, myNx,myNy,myN, Nx,Ny,N;
 // MPI variables
   int myRank, nOfProcs;
   //MPI_Status s1, s2;
