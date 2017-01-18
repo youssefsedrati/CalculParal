@@ -22,7 +22,7 @@ private:
 	decomposition *D;
 	comm_ctrl *C;
 	double eps, dist_squared, sigma;
-	double *RHS=NULL,*RHSit=NULL,*U=NULL,*Uit=NULL;
+	double *RHS=NULL,*RHSit=NULL,*U=NULL,*Uit=NULL, *Uup=NULL;
 	int iterMax,iter, myNx,myNy,myN, Nx,Ny,N;
 // MPI variables
   int myRank, nOfProcs;

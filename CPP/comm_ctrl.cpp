@@ -3,16 +3,16 @@
 #include "operator_matrix.h"
 
 comm_ctrl::comm_ctrl(decomposition *d, operator_matrix *a,
-			double *rhs, double *rhs_up, double *u, double *U_up){			
-	D=d; A=a, u_up=U_up; RHS=rhs, U=u; RHS_up=rhs_up;
+			double *rhs, double *rhs_up, double *U_up){			
+	D=d; A=a; u_up=U_up; RHS=rhs; RHS_up=rhs_up;
 	init_neighbour_ranks();
 	init_group_behaviour();
 }
 
 comm_ctrl::~comm_ctrl(){}
 
-void comm_ctrl::send(){
-	send_updates();
+void comm_ctrl::send(double *U){
+	send_updates(U);
 }
 
 void comm_ctrl::receive(){
@@ -22,7 +22,7 @@ void comm_ctrl::receive(){
 		is_myGroup_waiting=true;
 }
 
-void comm_ctrl::compile_solution(){
+void comm_ctrl::compile_solution(double *U){
 	MPI_Allreduce(MPI_IN_PLACE, U, D->get_N(), MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 }
 
@@ -43,14 +43,14 @@ void comm_ctrl::init_group_behaviour(){
 	is_myGroup_waiting = !am_I_in_rootGroup;
 }
 
-void comm_ctrl::send_updates(){
-	send_update_toBottom();
-	send_update_toTop();
-	send_update_toLeft();
-	send_update_toRight();
+void comm_ctrl::send_updates(double *U){
+	send_update_toBottom(U);
+	send_update_toTop(U);
+	send_update_toLeft(U);
+	send_update_toRight(U);
 }
 
-void comm_ctrl::send_update_toBottom(){
+void comm_ctrl::send_update_toBottom(double *U){
 	if(bottomRank<0) return;
 	int *idx = D->get_index_global_bottom();
 	for(size_t i=0;i<D->get_myNx();++i){
@@ -60,7 +60,7 @@ void comm_ctrl::send_update_toBottom(){
 	MPI_Send(u_up,D->get_N(),MPI_DOUBLE,bottomRank,100,MPI_COMM_WORLD);
 }
 
-void comm_ctrl::send_update_toTop(){
+void comm_ctrl::send_update_toTop(double *U){
 	if(topRank<0) return;
 	int *idx = D->get_index_global_top();
 	for(size_t i=0;i<D->get_myNx();++i){
@@ -70,7 +70,7 @@ void comm_ctrl::send_update_toTop(){
 	MPI_Send(u_up,D->get_N(),MPI_DOUBLE,topRank,200,MPI_COMM_WORLD);
 }
 
-void comm_ctrl::send_update_toLeft(){
+void comm_ctrl::send_update_toLeft(double *U){
 	if(leftRank<0) return;
 	int *idx = D->get_index_global_left();
 	for(size_t i=0;i<D->get_myNy();++i){
@@ -80,7 +80,7 @@ void comm_ctrl::send_update_toLeft(){
 	MPI_Send(u_up,D->get_N(),MPI_DOUBLE,leftRank,300,MPI_COMM_WORLD);
 }
 
-void comm_ctrl::send_update_toRight(){
+void comm_ctrl::send_update_toRight(double *U){
 	if(rightRank<0) return;
 	int *idx = D->get_index_global_right();
 	for(size_t i=0;i<D->get_myNy();++i){
@@ -132,7 +132,7 @@ void comm_ctrl::receive_update_fromLeft(){
 void comm_ctrl::receive_update_fromRight(){
 	if(rightRank<0) return;
 	MPI_Recv(u_up, D->get_N(), MPI_DOUBLE, rightRank, 300, MPI_COMM_WORLD, &mpi_stat);
-	int *idx = D->get_index_global_bottom();
+	int *idx = D->get_index_global_right();
 	for(size_t i=0;i<D->get_myNy();++i){
 		int j = idx[i];
 		RHS_up[j] = RHS[j] - A->Cx() * u_up[j+1]; 

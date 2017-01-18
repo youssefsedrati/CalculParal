@@ -10,7 +10,7 @@ void print_D(decomposition *D, int myRank);
 void print_D_inner(decomposition *D, int myRank);
 
 int main(){
-	int myRank, nOfProcs, nOfProcs_x=1, nx=10, ny=10;
+	int myRank, nOfProcs, nOfProcs_x=nOfProcs, nx=20, ny=20;
 	MPI_Init(NULL,NULL);
   MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
   MPI_Comm_size(MPI_COMM_WORLD, &nOfProcs);
@@ -18,7 +18,7 @@ int main(){
 	decomposition D(myRank, nOfProcs, nOfProcs, nx, ny);
 	for(int k=0;k<nOfProcs;++k){
 		if(myRank==k)
-			print_D_inner(&D,myRank);
+			print_D(&D,myRank);
 		MPI_Barrier(MPI_COMM_WORLD);
 	}
 	

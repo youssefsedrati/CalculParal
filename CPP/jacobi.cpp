@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <mpi.h>
+#include <string.h>
 #include "tools.h"
 #include "jacobi.h"
 #include "decomposition.h"
@@ -20,9 +21,10 @@ JacobiMethod::JacobiMethod(operator_matrix *a,decomposition *dc,
 	N  = D->get_N();
 	Nx = D->get_Nx();
 	Ny = D->get_Ny();
+	Uup  = (double*) malloc(N*sizeof(double));
   Uit  = (double*) calloc(N,sizeof(double));
 	RHSit= (double*) malloc(N*sizeof(double));
-	C = new comm_ctrl(D,A,RHS,RHSit,U,Uit);
+	C = new comm_ctrl(D,A,RHS,RHSit,Uup);
 }
 
 JacobiMethod::~JacobiMethod(){
@@ -39,12 +41,14 @@ void JacobiMethod::compute(int itermax, double e){
 void JacobiMethod::save(){
 	if(myRank!=0) return;
 	cout << "#" << myRank << ". saving.\n";
-	FILEOUT = ofstream("Jacobi_test_sol.data",ios::out);
+	std::string filename = "Jacobi_test_sol.data";
+	//filename.append(to_string(myRank)); filename.append(".data");
+	FILEOUT = ofstream(filename,ios::out);
 	if(!FILEOUT) return;
 	FILEOUT << Nx << " "<< Ny <<endl;
-	for(int i=0;i<Nx;++i){
-		for(int j=0;j<Ny;++j)
-			FILEOUT << U[i+Nx*j] << " ";
+	for(int i=Ny-1;i>=0;--i){
+		for(int j=0;j<Nx;++j)
+			FILEOUT << U[j+Nx*i] << " ";
 		FILEOUT << endl;
 	}
 	FILEOUT.close();
@@ -71,11 +75,15 @@ void JacobiMethod::init_sys(){
 }
 
 void JacobiMethod::compute_iterate(){	
-	while( (iter<iterMax)&&(dist_squared>eps*eps) ){
+	while( (iter<=iterMax)&&(dist_squared>eps*eps) ){
 		C->receive(); // eventually wait until all processors have sent
-		if(iter%2) compute_alternate_update(Uit,U);
-		else compute_alternate_update(U,Uit);
-		C->send(); // eventually wait until all processors have received
+		if(iter%2){
+			compute_alternate_update(Uit,U);
+			C->send(U);// eventually wait until all processors have received
+		}else{
+			compute_alternate_update(U,Uit);
+			C->send(Uit);
+		}
 		compute_dist_squared();
 		C->cumulate_dist_squared(&dist_squared);
 		iter+=1;
@@ -161,7 +169,7 @@ void JacobiMethod::compute_dist_squared(){
 void JacobiMethod::compute_gen_sol(){
 	for(int i=0;i<N;++i) U[i]= Uit[i];
 	MPI_Barrier(MPI_COMM_WORLD);
-	//C->compile_solution();
+	C->compile_solution(U);		
   if(myRank == 0){
     printf("Jacobi method terminated after"
            " %d iterations, squared_dist= %0.31f\n", iter-1,sqrt(dist_squared));
