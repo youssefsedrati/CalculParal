@@ -26,8 +26,6 @@ private:
 	int iterMax,iter, myNx,myNy,myN, Nx,Ny,N;
 // MPI variables
   int myRank, nOfProcs;
-  //MPI_Status s1, s2;
-  //MPI_Request r1, r2, r3, r4;
 // file operations
 	std::ofstream FILEOUT;
 // functions

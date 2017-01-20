@@ -3,7 +3,7 @@
 #include <math.h>
 #include <mpi.h>
 #include <string.h>
-#include "tools.h"
+
 #include "jacobi.h"
 #include "decomposition.h"
 #include "operator_matrix.h"
