@@ -20,7 +20,7 @@ private:
 	operator_matrix *A;
 	decomposition *D;
 	comm_ctrl *C;
-	
+
 	double eps, alpha, beta, gamma, norm;
 	double *RHS=NULL,*RHSit=NULL,*U=NULL,*R=NULL,*P=NULL,*AP=NULL,*Uup=NULL;
 	int iterMax,iter, myNx,myNy,myN, Nx,Ny,N;
@@ -49,6 +49,12 @@ private:
 	void matrix_vector_product_bottom(double *X, double *RESULT);
 	void matrix_vector_product_left(double *X, double *RESULT);
 	void matrix_vector_product_right(double *X, double *RESULT);
+	void matrix_vector_product_global(double *X, double *RESULT);
+	void matrix_vector_product_global_inner(double *X, double *RESULT);
+	void matrix_vector_product_global_top(double *X, double *RESULT);
+	void matrix_vector_product_global_bottom(double *X, double *RESULT);
+	void matrix_vector_product_global_left(double *X, double *RESULT);
+	void matrix_vector_product_global_right(double *X, double *RESULT);
 };
 
 

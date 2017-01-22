@@ -26,10 +26,9 @@ int main(){
 	
 	for(int i=0;i<N;++i){
 		RHS[i] = 1;
-		U[i] = 1.1;
 	}
 	CGMethod CG(&A,&Dc,RHS,U);
-	//CG.compute(maxiter,eps);
-	//CG.save();
+	CG.compute(maxiter,eps);
+	CG.save();
 	MPI_Finalize();
 }
