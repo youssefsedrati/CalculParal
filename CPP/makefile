@@ -1,17 +1,14 @@
 CC=mpicc
-EXEC= main.out
 
-all: $(EXEC) 
-
-main.out: main.o conjgrad.o tools.o cdt_bords.o jacobi.o
+congrad_test.exe: congrad_test.o conjgrad.o comm_ctrl.o decomposition.o operator_matrix.o
 	$(CC) -W -Wall $^ -o $@ -lm
 
-%.out: %.o
-	$(CC) -W -Wall $< -o $@ -lm
-
+jacobi_test.exe: jacobi_test.o conjgrad.o comm_ctrl.o decomposition.o operator_matrix.o
+	$(CC) -W -Wall $^ -o $@ -lm
+	
 %.o: %.cpp
 	$(CC) -W -Wall -c $< -lm
 
 clean: 
-	rm -f *.out sol* time* speedup *.o
+	rm -f *.exe *.o
 	rm -rf *~
