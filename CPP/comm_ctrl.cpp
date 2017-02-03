@@ -2,6 +2,11 @@
 #include "decomposition.h"
 #include "operator_matrix.h"
 
+/* comm_ctrl holds information of adjacency for each process
+   in directions (top,bottom,left,right);
+	 according to which updates are sent (boundary values)
+	 and received (incorporate these values into RHS);
+*/
 comm_ctrl::comm_ctrl(decomposition *d, operator_matrix *a,
 			double *rhs, double *rhs_up, double *U_up){
 	D=d; A=a; u_up=U_up; RHS=rhs; RHS_up=rhs_up;

@@ -8,6 +8,12 @@
 #include "operator_matrix.h"
 #include "comm_ctrl.h"
 
+/* implementation of the Conjugate Gradient.
+	 iteration constants and vectors are successively updated in the routine
+			compute_iterate();
+	 each process uses its decomposition (ie. subdomain) to operate on;
+*/
+
 using namespace std;
 
 // constructor & destructor
@@ -288,3 +294,4 @@ void CGMethod::matrix_vector_product_global_right(double *X, double *RESULT){
 							+A->Aii()* X[i];
 	}
 }
+

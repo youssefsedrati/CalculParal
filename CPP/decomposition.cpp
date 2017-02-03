@@ -3,6 +3,10 @@
 #include <iostream>
 #include "decomposition.h"
 
+/* decomposition manages index vectors used to access U
+   each process has its own decomposition holding the spatial points of its subdomain
+	 they are accessed by the global index getter functions.
+ */
 decomposition::decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, int ny){
 	myRank = myrank; N_procs = nb_procs; N_procs_x = nb_procs_x; N_procs_y = N_procs/N_procs_x;
 	Nx = nx; Ny = ny; N = Nx*Ny;
@@ -111,6 +115,7 @@ bool decomposition::is_admissable(){
 	return( (N_procs>0)&&(N_procs_x>0)&&(myRank<N_procs)&&(N_procs_x*N_procs_y==N_procs) );
 }
 
+/* decompose() and its daughter functions */
 void decomposition::decompose(){
 		decompose_x();
 		decompose_y();
