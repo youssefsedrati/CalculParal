@@ -25,8 +25,8 @@ CGMethod::CGMethod(operator_matrix *a,decomposition *dc,
 	myNy = D->get_myNy();Ny = D->get_Ny();
 	Uup  = (double*) malloc(N*sizeof(double));
 	R  = (double*) malloc(myN*sizeof(double));
-    P  = (double*) malloc(myN*sizeof(double));
-    AP  = (double*) malloc(myN*sizeof(double));
+  P  = (double*) malloc(myN*sizeof(double));
+  AP  = (double*) malloc(myN*sizeof(double));
 	RHSit= (double*) malloc(N*sizeof(double));
 	C = new comm_ctrl(D,A,RHS,RHSit,Uup);
 }

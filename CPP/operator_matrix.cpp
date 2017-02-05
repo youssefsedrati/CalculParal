@@ -3,12 +3,17 @@
 /* operator_matrix holds the contents of the discrete Laplacian;
 	 three values in total: diagonal, close side diagonals, far side diagonals
 */
-operator_matrix::operator_matrix(int Nx, int Ny, double Lx, double Ly, double D){
-	dx  = Lx/(1 + Nx);
-	dy  = Ly/(1 + Ny);
-	_Aii = 2.0*D/(dx*dx)+ 2.0*D/(dy*dy);
-	_Cx  = -1.0*D/(dx*dx);
-	_Cy  = -1.0*D/(dy*dy);
+operator_matrix::operator_matrix(int Nx, int Ny, double Lx, double Ly, double D, bool NeumannBC){
+	if(NeumannBC){
+		_dx  = Lx/(-1 + Nx);
+		_dy  = Ly/(-1 + Ny);
+	}else{
+		_dx  = Lx/(1 + Nx);
+		_dy  = Ly/(1 + Ny);
+	}	
+	_Aii = 2.0*D/(_dx*_dx)+ 2.0*D/(_dy*_dy);
+	_Cx  = -1.0*D/(_dx*_dx);
+	_Cy  = -1.0*D/(_dy*_dy);
 }
 
 operator_matrix::operator_matrix(){
@@ -29,4 +34,12 @@ double operator_matrix::Cx(){
 
 double operator_matrix::Cy(){
 	return _Cy;
+}
+
+double operator_matrix::dx(){
+	return _dx;
+}
+
+double operator_matrix::dy(){
+	return _dy;
 }
