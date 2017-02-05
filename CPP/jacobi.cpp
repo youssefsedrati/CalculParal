@@ -48,15 +48,16 @@ void JacobiMethod::save(){
 	cout << "#" << myRank << ". saving.\n";
 	std::string filename = "Jacobi_test_sol.data";
 	//filename.append(to_string(myRank)); filename.append(".data");
-	FILEOUT = ofstream(filename,ios::out);
-	if(!FILEOUT) return;
-	FILEOUT << Nx << " "<< Ny <<endl;
+	//FILEOUT = 
+	std::ofstream ofs("Jacobi_test_sol.data",std::ofstream::out);
+	if(!ofs) return;
+	ofs << Nx << " "<< Ny <<endl;
 	for(int i=Ny-1;i>=0;--i){
 		for(int j=0;j<Nx;++j)
-			FILEOUT << U[j+Nx*i] << " ";
-		FILEOUT << endl;
+			ofs << U[j+Nx*i] << " ";
+		ofs << endl;
 	}
-	FILEOUT.close();
+	ofs.close();
 }
 
 // private
