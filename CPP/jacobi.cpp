@@ -117,12 +117,12 @@ void JacobiMethod::compute_alternate_update_inner(double* U, double* Unew){
 
 void JacobiMethod::compute_alternate_update_left(double* U, double* Unew){
 	int i,*idx = D->get_index_global_left();
-	/*if(NeumannBC && D->get_myRank_x()==0){
+	if(NeumannBC && D->get_myRank_x()==0){
 		i = idx[0];
-		Unew[i] = (RHSit[i]-2*A->Cx()*U[i+1]-A->Cy()*U[i+Nx])/A->Aii();
+		Unew[i] = (RHSit[i]-A->Cx()*U[i+1]-A->Cy()*U[i+Nx])/A->Aii()*2;
 		i = idx[myNy-1];	
-		Unew[i] = (RHSit[i]-2*A->Cx()*U[i+1]-A->Cy()*U[i-Nx])/A->Aii();
-	}else*/{
+		Unew[i] = (RHSit[i]-A->Cx()*U[i+1]-A->Cy()*U[i-Nx])/A->Aii()*2;
+	}else{
 		i = idx[0];
 		Unew[i] = (RHSit[i]-A->Cx()*U[i+1]-A->Cy()*U[i+Nx])/A->Aii();
 		i = idx[myNy-1];	
@@ -140,12 +140,12 @@ void JacobiMethod::compute_alternate_update_left(double* U, double* Unew){
 
 void JacobiMethod::compute_alternate_update_right(double* U, double* Unew){
 	int i,*idx = D->get_index_global_right();
-	/*if(NeumannBC && D->get_myRank_x()==D->get_N_procs_x()-1){
+	if(NeumannBC && D->get_myRank_x()==D->get_N_procs_x()-1){
 		i = idx[0];
-		Unew[i] = (RHSit[i]-2*A->Cx()*U[i-1]-A->Cy()*U[i+Nx])/A->Aii();
+		Unew[i] = (RHSit[i]-A->Cx()*U[i-1]-A->Cy()*U[i+Nx])/A->Aii()*2;
 		i = idx[myNy-1];	
-		Unew[i] = (RHSit[i]-2*A->Cx()*U[i-1]-A->Cy()*U[i-Nx])/A->Aii();
-	}else*/{
+		Unew[i] = (RHSit[i]-A->Cx()*U[i-1]-A->Cy()*U[i-Nx])/A->Aii()*2;
+	}else{
 		i = idx[0];
 		Unew[i] = (RHSit[i]-A->Cx()*U[i-1]-A->Cy()*U[i+Nx])/A->Aii();
 		i = idx[myNy-1];	

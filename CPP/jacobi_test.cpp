@@ -14,16 +14,17 @@ void fill_RHS_force(decomposition *D,operator_matrix *A, double *RHS);
 void fill_RHS_NeumannBC(decomposition *D,operator_matrix *A, double *RHS);
 
 int main(){
-  int myrank, n_procs;
+  int myRank, n_procs;
 	MPI_Init(NULL,NULL);
-  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
   MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
 	
   int Nx = 20,Ny =20,N = Nx*Ny, maxiter=10000;
-	double 	Lx = 1.,  Ly = 1., D =1., eps = 1e-10;
-	bool NeumannBC = true;
+	double 	Lx = 1.,  Ly = 1., D =1., eps = 1e-10, t1,t2;
+	bool NeumannBC = false;
 	
-	decomposition Dc(myrank, n_procs, 1, Nx, Ny);
+	if(!myRank) t1=MPI_Wtime(); 
+	decomposition Dc(myRank, n_procs, 1, Nx, Ny);
 	operator_matrix A(Nx, Ny, Lx, Ly, D,NeumannBC);	
   double *U,*RHS;
 	U    = (double*) calloc(N,sizeof(double)); 
@@ -32,10 +33,15 @@ int main(){
 		U[i] = 1.1;
 	}
 	fill_RHS_force(&Dc,&A,RHS);
-	fill_RHS_NeumannBC(&Dc,&A,RHS);
+	//fill_RHS_NeumannBC(&Dc,&A,RHS);
 	JacobiMethod J(&A,&Dc,RHS,U);
 	J.compute(maxiter,eps,NeumannBC);
 	J.save();	
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(!myRank) {
+		t2=MPI_Wtime(); 
+		cout << "time elapsed: " << t2-t1 << endl;
+	}
 	MPI_Finalize();
 }
 
@@ -55,18 +61,18 @@ void fill_RHS_NeumannBC(decomposition *D,operator_matrix *A, double *RHS){
 	double dx=A->dx(), dy=A->dy();
 	for(int i=1;i<Nx-1;++i){
 		double x = (double)i/(Nx-1), y = 0;
-		RHS[i] += //2*(sin(x) + cos(y))/dx;
-			2/dx;
+		RHS[i] -= //2*(sin(x) + cos(y))/dx;
+			0;//2/dx;
 		y = 1;
-		RHS[i+Nx*(Nx-1)]+= //2*(sin(x) + cos(y))/dx;
-			2/dx;
+		RHS[i+Nx*(Nx-1)]-= //2*(sin(x) + cos(y))/dx;
+			0;//2/dx;
 	}
 	for(int i=1;i<Ny-1;++i){
 		double x = 0, y =(double)i/(Ny-1);
-		RHS[i*Nx] += //2*(sin(x) + cos(y))/dy;
+		RHS[i*Nx] -= //2*(sin(x) + cos(y))/dy;
 			2/dy;
 		x = 1;
-		RHS[(i+1)*Nx-1]+= //2*(sin(x) + cos(y))/dy;
+		RHS[(i+1)*Nx-1]-= //2*(sin(x) + cos(y))/dy;
 			2/dy;
 	}
 }
