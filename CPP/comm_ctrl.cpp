@@ -10,6 +10,7 @@
 comm_ctrl::comm_ctrl(decomposition *d, operator_matrix *a,
 			double *rhs, double *rhs_up, double *U_up){
 	D=d; A=a; u_up=U_up; RHS=rhs; RHS_up=rhs_up;
+	length = 2*(D->get_myNx()+D->get_myNy());
 	init_neighbour_ranks();
 	init_group_behaviour();
 }
@@ -62,7 +63,7 @@ void comm_ctrl::send_update_toBottom(double *U){
 		int j = idx[i];
 		u_up[j] = U[j];
 	}
-	MPI_Send(u_up,D->get_N(),MPI_DOUBLE,bottomRank,100,MPI_COMM_WORLD);
+	MPI_Send(u_up,length,MPI_DOUBLE,bottomRank,100,MPI_COMM_WORLD);
 }
 
 void comm_ctrl::send_update_toTop(double *U){
@@ -72,7 +73,7 @@ void comm_ctrl::send_update_toTop(double *U){
 		int j = idx[i];
 		u_up[j] = U[j];
 	}
-	MPI_Send(u_up,D->get_N(),MPI_DOUBLE,topRank,200,MPI_COMM_WORLD);
+	MPI_Send(u_up,length,MPI_DOUBLE,topRank,200,MPI_COMM_WORLD);
 }
 
 void comm_ctrl::send_update_toLeft(double *U){
@@ -82,7 +83,7 @@ void comm_ctrl::send_update_toLeft(double *U){
 		int j = idx[i];
 		u_up[j] = U[j];
 	}
-	MPI_Send(u_up,D->get_N(),MPI_DOUBLE,leftRank,300,MPI_COMM_WORLD);
+	MPI_Send(u_up,length,MPI_DOUBLE,leftRank,300,MPI_COMM_WORLD);
 }
 
 void comm_ctrl::send_update_toRight(double *U){
@@ -92,7 +93,7 @@ void comm_ctrl::send_update_toRight(double *U){
 		int j = idx[i];
 		u_up[j] = U[j];
 	}
-	MPI_Send(u_up,D->get_N(),MPI_DOUBLE,rightRank,400,MPI_COMM_WORLD);
+	MPI_Send(u_up,length,MPI_DOUBLE,rightRank,400,MPI_COMM_WORLD);
 }
 
 void comm_ctrl::receive_updates(){
@@ -104,7 +105,7 @@ void comm_ctrl::receive_updates(){
 
 void comm_ctrl::receive_update_fromBottom(){
 	if(bottomRank<0) return;
-	MPI_Recv(u_up, D->get_N(), MPI_DOUBLE, bottomRank, 200, MPI_COMM_WORLD, &mpi_stat);
+	MPI_Recv(u_up, length, MPI_DOUBLE, bottomRank, 200, MPI_COMM_WORLD, &mpi_stat);
 	int *idx = D->get_index_global_bottom(),
 			offset = D->get_Nx();
 	for(int i=0;i<D->get_myNx();++i){

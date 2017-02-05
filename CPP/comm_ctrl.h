@@ -20,7 +20,7 @@ public:
 	void compile_solution(double *U);
 	void cumulate_dist_squared(double* dsq);
 private:
-	int myRank, bottomRank, topRank, leftRank, rightRank;
+	int myRank, bottomRank, topRank, leftRank, rightRank, length;
 	bool am_I_in_rootGroup, is_myGroup_waiting;
 	decomposition *D;
 	operator_matrix *A;
