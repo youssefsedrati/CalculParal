@@ -16,6 +16,7 @@ public:
 	~JacobiMethod();
 	void compute(int itermax,double e,bool neumannBC);
 	void save();
+	void save_gnuplot();
 private:
 // system variables
 	operator_matrix *A;

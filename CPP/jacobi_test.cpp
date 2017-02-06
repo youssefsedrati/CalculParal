@@ -11,16 +11,13 @@
 
 using namespace std;
 
-void fill_RHS_force(decomposition *D,operator_matrix *A, double *RHS);
-void fill_RHS_NeumannBC(decomposition *D,operator_matrix *A, double *RHS);
-
 int main(){
   int myRank, n_procs;
 	MPI_Init(NULL,NULL);
   MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
   MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
 	
-  int Nx = 12,Ny =12,N = Nx*Ny, maxiter=10000;
+  int Nx = 20,Ny =20,N = Nx*Ny, maxiter=10000;
 	double 	Lx = 1.,  Ly = 1., D =1., eps = 1e-10, t1,t2;
 	bool NeumannBC = false;
 	
@@ -33,12 +30,12 @@ int main(){
 	for(int i=0;i<N;++i){
 		U[i] = 1.1;
 	}
-	fill_RHS_force(&Dc,&A,RHS,&f);
+	fill_RHS_force(&Dc,&A,RHS,&one);
 	//fill_RHS_NeumannBC(&Dc,&A,RHS);
 	fill_RHS_DirichletBC(&Dc,&A,RHS,&null);
 	JacobiMethod J(&A,&Dc,RHS,U);
 	J.compute(maxiter,eps,NeumannBC);
-	J.save();	
+	J.save_gnuplot();	
 	MPI_Barrier(MPI_COMM_WORLD);
 	if(!myRank) {
 		t2=MPI_Wtime(); 

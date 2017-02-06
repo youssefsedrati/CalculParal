@@ -60,6 +60,22 @@ void JacobiMethod::save(){
 	ofs.close();
 }
 
+void JacobiMethod::save_gnuplot(){ 
+  if(myRank!=0) return; 
+  cout << "#" << myRank << ". saving.\n"; 
+  std::string filename = "Jacobi_gnuplot.dat"; 
+  std::ofstream ofs("Jacobi_gnuplot.dat",std::ofstream::out); 
+  if(!ofs) return; 
+  for(int i=0;i<Ny;++i){ 
+    for(int j=0;j<Nx;++j){ 
+      double x= (double)(j+1)/(Nx+1), y= (double)(i+1)/(Ny+1); 
+      ofs << x << " " << y << " " << U[j+Nx*i] << endl; 
+    } 
+    ofs << endl; 
+  } 
+  ofs.close(); 
+} 
+
 // private
 void JacobiMethod::init(int itermax, double e, bool neumannBC){
 	NeumannBC = neumannBC;

@@ -1,3 +1,9 @@
 *.o
 *.exe
 *.cmd
+*.pdf
+*.sh
+*.bat
+*.dat
+*.data
+.DS_Store
