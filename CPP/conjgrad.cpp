@@ -23,6 +23,7 @@ CGMethod::CGMethod(operator_matrix *a,decomposition *dc,
 	myN  = D->get_myN(); N  = D->get_N();
 	myNx = D->get_myNx();Nx = D->get_Nx();
 	myNy = D->get_myNy();Ny = D->get_Ny();
+	Z  = (double*) malloc(myN*sizeof(double));
 	R  = (double*) malloc(myN*sizeof(double));
   P  = (double*) malloc(myN*sizeof(double));
   AP  = (double*) malloc(myN*sizeof(double));
@@ -95,8 +96,9 @@ void CGMethod::init_sys(){
 	int *idx = D->get_index_global(), j;
 	for(int i=0;i<myN;++i){
 		j = idx[i];
-		P[i] = R[i] = RHSit[j] - AP[i];
 		U[j] = 1;
+		R[i] = RHSit[j] - AP[i];
+		P[i] = Z[i] = R[i]/A->Aii();
 	}
 }
 
@@ -115,7 +117,7 @@ void CGMethod::compute_iterate(){
 }
 
 void CGMethod::compute_alpha(){
-	gamma = vector_product(R,R);
+	gamma = vector_product(Z,R);
 	alpha = gamma/conjugate_vector_norm(P);
 }
 
@@ -129,14 +131,15 @@ void CGMethod::compute_update(){
 
 void CGMethod::compute_residue(){
 	int *idx = D->get_index_global();
-	/*matrix_vector_product_global(U,R);
+	matrix_vector_product_global(U,R);
 	for(int i=0;i<myN;++i){
 		int j = idx[i];
 		R[i] = RHSit[j] - R[i];
-	}*/
-	for(int i=0;i<myN;++i){
-		R[i] = R[i] - alpha*AP[i];
+		Z[i] = R[i]/A->Aii();
 	}
+	/*for(int i=0;i<myN;++i){
+		R[i] = R[i] - alpha*AP[i];
+	}*/
 }
 
 void CGMethod::compute_beta(){
@@ -146,7 +149,7 @@ void CGMethod::compute_beta(){
 
 void CGMethod::compute_gradient(){
 	for(int i=0;i<myN;++i){
-		P[i] = R[i] + beta*P[i];
+		P[i] = Z[i] + beta*P[i]/A->Aii();
 	}
 }
 
