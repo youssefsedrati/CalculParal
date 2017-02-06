@@ -20,17 +20,17 @@ public:
 	void compile_solution(double *U);
 	void cumulate_dist_squared(double* dsq);
 private:
+	int myNx, myNy, myN;
 	int myRank, bottomRank, topRank, leftRank, rightRank;
 	int topOffset, botOffset, leftOffset, rightOffset;
 	bool am_I_in_rootGroup, is_myGroup_waiting;
 	decomposition *D;
 	operator_matrix *A;
-	double *RHS, *RHS_up, *u_send, *u_recv;
+	double *RHS, *RHS_up, *u_send, *u_recv, *u_top, *u_bot, *u_left, *u_right;
 	MPI_Status mpi_stat;
 //
 	void init_neighbour_ranks();
 	void init_group_behaviour();
-	void init_neighbour_offset();
 	void comm_neighbour_int(int sendRank,int recvRank,int* msg,int* recv_buf, int label);
 	void send_updates(double *u);
 	void send_update_toBottom(double *u);

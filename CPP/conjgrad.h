@@ -15,6 +15,7 @@ public:
 	~CGMethod();
 	void compute(int iterMax, double eps);
 	void save();
+	void save_gnuplot();
 private:
 // system variables
 	operator_matrix *A;

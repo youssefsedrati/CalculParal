@@ -9,19 +9,18 @@ using namespace std;
 	 according to which updates are sent (boundary values)
 	 and received (incorporate these values into RHS);
 	 
-	 u_send/recv are vectors used in transmissions;
-	 u_send = [toBot,toTop,toLeft,toRight]
-	 u_recv = [fromTop,fromBot,fromRight,fromLeft]
+	 u_top/bot... are vectors used in transmissions;
 */
 comm_ctrl::comm_ctrl(decomposition *d, operator_matrix *a,
 			double *rhs, double *rhs_up){
 	D=d; A=a;RHS=rhs; RHS_up=rhs_up;
-	int length = 2* (D->get_myNx() + D->get_myNy())+2;
-	u_send = (double*)malloc(length*sizeof(int));
-	u_recv = (double*)malloc(length*sizeof(int));
+	myN = D->get_myN(); myNx = D->get_myNx(); myNy = D->get_myNy(); 
+	u_bot = (double*)malloc(myNx*sizeof(double));
+	u_top = (double*)malloc(myNx*sizeof(double));
+	u_left = (double*)malloc(myNy*sizeof(double));
+	u_right = (double*)malloc(myNy*sizeof(double));
 	init_neighbour_ranks();
 	init_group_behaviour();
-	init_neighbour_offset();
 }
 
 comm_ctrl::~comm_ctrl(){
@@ -29,8 +28,10 @@ comm_ctrl::~comm_ctrl(){
 }
 
 void comm_ctrl::cleanup(){
-	if(u_send) free(u_send);
-	if(u_recv) free(u_recv);
+	if(u_bot) free(u_bot);
+	if(u_top) free(u_top);
+	if(u_left) free(u_left);
+	if(u_right) free(u_right);
 }
 
 void comm_ctrl::send(double *U){
@@ -67,20 +68,6 @@ void comm_ctrl::init_group_behaviour(){
 	is_myGroup_waiting = !am_I_in_rootGroup;
 }
 
-/* since decompositions dont all have the same Nx,Ny,
-	 share length information at start
-*/
-void comm_ctrl::init_neighbour_offset(){
-	int msg = 2*D->get_myNx() + D->get_myNy(); 
-	comm_neighbour_int(rightRank,leftRank,&msg,&leftOffset,21);
-	msg = 2*D->get_myNx(); 
-	comm_neighbour_int(leftRank,rightRank,&msg,&rightOffset,22);
-	msg = D->get_myNx(); 
-	comm_neighbour_int(topRank,bottomRank,&msg,&botOffset,23);
-	msg = 0;
-	comm_neighbour_int(bottomRank,topRank,&msg,&topOffset,24);
-}
-
 // sends integer to sendRank who receives from his recvRank (this process)
 void comm_ctrl::comm_neighbour_int(int sendRank,int recvRank,int* msg,int* recv_buf, int label){
 	if(sendRank>=0){
@@ -105,46 +92,42 @@ void comm_ctrl::send_updates(double *U){
 
 void comm_ctrl::send_update_toBottom(double *U){
 	if(bottomRank<0) return;
-	int *idx = D->get_index_global_bottom(),
-			offset = 0;
-	for(int i=0;i<D->get_myNx();++i){
+	int *idx = D->get_index_global_bottom();
+	for(int i=0;i<myNx;++i){
 		int j = idx[i];
-		u_send[i] = U[j];
+		u_bot[i] = U[j];
 	}
-	MPI_Send(u_send+offset,D->get_myNx(),MPI_DOUBLE,bottomRank,100,MPI_COMM_WORLD);
+	MPI_Send(u_bot,myNx,MPI_DOUBLE,bottomRank,100,MPI_COMM_WORLD);
 }
 
 void comm_ctrl::send_update_toTop(double *U){
 	if(topRank<0) return;
-	int *idx = D->get_index_global_top(),
-			offset = D->get_myNx();
-	for(int i=0;i<offset;++i){
+	int *idx = D->get_index_global_top();
+	for(int i=0;i<myNx;++i){
 		int j = idx[i];
-		u_send[i] = U[j];
+		u_top[i] = U[j];
 	}
-	MPI_Send(u_send+offset,offset,MPI_DOUBLE,topRank,200,MPI_COMM_WORLD);
+	MPI_Send(u_top,myNx,MPI_DOUBLE,topRank,200,MPI_COMM_WORLD);
 }
 
 void comm_ctrl::send_update_toLeft(double *U){
 	if(leftRank<0) return;
-	int *idx = D->get_index_global_left(),
-			offset = 2*D->get_myNx();
-	for(int i=0;i<D->get_myNy();++i){
+	int *idx = D->get_index_global_left();
+	for(int i=0;i<myNy;++i){
 		int j = idx[i];
-		u_send[i] = U[j];
+		u_left[i] = U[j];
 	}
-	MPI_Send(u_send+offset,D->get_myNy(),MPI_DOUBLE,leftRank,300,MPI_COMM_WORLD);
+	MPI_Send(u_left,myNy,MPI_DOUBLE,leftRank,300,MPI_COMM_WORLD);
 }
 
 void comm_ctrl::send_update_toRight(double *U){
 	if(rightRank<0) return;
-	int *idx = D->get_index_global_right(),
-			offset = 2*D->get_myNx() + D->get_myNy();
-	for(int i=0;i<D->get_myNy();++i){
+	int *idx = D->get_index_global_right();
+	for(int i=0;i<myNy;++i){
 		int j = idx[i];
-		u_send[i] = U[j];
+		u_right[i] = U[j];
 	}
-	MPI_Send(u_send+offset,D->get_myNy(),MPI_DOUBLE,rightRank,400,MPI_COMM_WORLD);
+	MPI_Send(u_right,myNy,MPI_DOUBLE,rightRank,400,MPI_COMM_WORLD);
 }
 
 /* main receive routine 
@@ -160,40 +143,40 @@ void comm_ctrl::receive_updates(){
 
 void comm_ctrl::receive_update_fromBottom(){
 	if(bottomRank<0) return;
-	MPI_Recv(u_recv+botOffset, D->get_myNx(), MPI_DOUBLE, bottomRank, 200, MPI_COMM_WORLD, &mpi_stat);
+	MPI_Recv(u_bot, myNx, MPI_DOUBLE, bottomRank, 200, MPI_COMM_WORLD, &mpi_stat);
 	int *idx = D->get_index_global_bottom();
-	for(int i=0;i<D->get_myNx();++i){
+	for(int i=0;i<myNx;++i){
 		int j = idx[i];
-		RHS_up[j] = RHS[j] - A->Cy() * u_recv[i];
+		RHS_up[j] = RHS[j] - A->Cy() * u_bot[i];
 	}
 }
 
 void comm_ctrl::receive_update_fromTop(){
 	if(topRank<0) return;
-	MPI_Recv(u_recv+topOffset,D->get_myNx(), MPI_DOUBLE, topRank, 100, MPI_COMM_WORLD, &mpi_stat);
+	MPI_Recv(u_top,myNx, MPI_DOUBLE, topRank, 100, MPI_COMM_WORLD, &mpi_stat);
 	int *idx = D->get_index_global_top();
-	for(int i=0;i<D->get_myNx();++i){
+	for(int i=0;i<myNx;++i){
 		int j = idx[i];
-		RHS_up[j] = RHS[j] - A->Cy() * u_recv[i];
+		RHS_up[j] = RHS[j] - A->Cy() * u_top[i];
 	}
 }
 
 void comm_ctrl::receive_update_fromLeft(){
 	if(leftRank<0) return;
-	MPI_Recv(u_recv+leftOffset,D->get_myNy(), MPI_DOUBLE, leftRank, 400, MPI_COMM_WORLD, &mpi_stat);
+	MPI_Recv(u_left,myNy, MPI_DOUBLE, leftRank, 400, MPI_COMM_WORLD, &mpi_stat);
 	int *idx = D->get_index_global_left();
-	for(int i=0;i<D->get_myNy();++i){
+	for(int i=0;i<myNy;++i){
 		int j = idx[i];
-		RHS_up[j] = RHS[j] - A->Cx() * u_recv[i];
+		RHS_up[j] = RHS[j] - A->Cx() * u_left[i];
 	}
 }
 
 void comm_ctrl::receive_update_fromRight(){
 	if(rightRank<0) return;
-	MPI_Recv(u_recv+rightOffset,D->get_myNy(), MPI_DOUBLE, rightRank, 300, MPI_COMM_WORLD, &mpi_stat);
+	MPI_Recv(u_right,myNy, MPI_DOUBLE, rightRank, 300, MPI_COMM_WORLD, &mpi_stat);
 	int *idx = D->get_index_global_right();
-	for(int i=0;i<D->get_myNy();++i){
+	for(int i=0;i<myNy;++i){
 		int j = idx[i];
-		RHS_up[j] = RHS[j] - A->Cx() * u_recv[i];
+		RHS_up[j] = RHS[j] - A->Cx() * u_right[i];
 	}
 }
