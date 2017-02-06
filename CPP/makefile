@@ -1,6 +1,8 @@
 CC=g++
 FLAGS = -Wall -c
 
+all: jacobi_test.exe conjgrad_test.exe
+
 jacobi_test.exe: jacobi_test.o jacobi.o conjgrad.o comm_ctrl.o decomposition.o operator_matrix.o
 	$(CC) $^ -o $@ -lmsmpi
 	
