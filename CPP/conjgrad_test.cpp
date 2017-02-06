@@ -27,14 +27,14 @@ int main(){
 	double *U,*RHS;
 	U  = (double*) calloc(N,sizeof(double));
 	RHS  = (double*) calloc(N,sizeof(double));
-	for(int i=0;i<N;++i) U[i] = 1;
 	
+	fill_RHS_force(&Dc,&A,U,&one);
 	fill_RHS_force(&Dc,&A,RHS,&one);
 	//fill_RHS_NeumannBC(&Dc,&A,RHS);
 	fill_RHS_DirichletBC(&Dc,&A,RHS,&null);
 	CGMethod CG(&A,&Dc,RHS,U);
 	CG.compute(maxiter,eps);
-	CG.save();
+	CG.save_gnuplot();
 	MPI_Barrier(MPI_COMM_WORLD);
 	if(!myRank) {
 		t2=MPI_Wtime(); 

@@ -57,11 +57,11 @@ void CGMethod::save(){
 	FILEOUT.close();
 }
 
-void JacobiMethod::save_gnuplot(){ 
+void CGMethod::save_gnuplot(){ 
   if(myRank!=0) return; 
   cout << "#" << myRank << ". saving.\n"; 
-  std::string filename = "Jacobi_gnuplot.dat"; 
-  std::ofstream ofs("Jacobi_gnuplot.dat",std::ofstream::out); 
+  std::string filename = "conjgrad_gnuplot.dat"; 
+  std::ofstream ofs("conjgrad_gnuplot.dat",std::ofstream::out); 
   if(!ofs) return; 
   for(int i=0;i<Ny;++i){ 
     for(int j=0;j<Nx;++j){ 
@@ -129,14 +129,14 @@ void CGMethod::compute_update(){
 
 void CGMethod::compute_residue(){
 	int *idx = D->get_index_global();
-	matrix_vector_product_global(U,R);
+	/*matrix_vector_product_global(U,R);
 	for(int i=0;i<myN;++i){
 		int j = idx[i];
 		R[i] = RHSit[j] - R[i];
-	}
-	/*for(int i=0;i<myN;++i){
-		R[i] = R[i] - alpha*AP[i];
 	}*/
+	for(int i=0;i<myN;++i){
+		R[i] = R[i] - alpha*AP[i];
+	}
 }
 
 void CGMethod::compute_beta(){

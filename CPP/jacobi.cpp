@@ -11,7 +11,8 @@
 
 /* implementation of the iterative Jacobi Method.
 	 the solution vectors are updated alternatingly;
-	 each process uses its decomposition (ie. subdomain) to operate on
+	 each process uses its decomposition (ie. subdomain) to operate on;
+	 additive schwarz is realized by transmitting Dirichlet data via comm_ctrl;
 */
 
 using namespace std;

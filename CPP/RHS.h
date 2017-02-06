@@ -9,6 +9,10 @@ using namespace std;
  
 double f(double x,double y){ 
   return 2*(x*(1-x) + y*(1-y) ); 
+}  
+
+double f1(double x,double y){ 
+  return f(x,y)/4;
 } 
  
 double g(double x,double y){ 
@@ -28,7 +32,7 @@ void fill_RHS_force(decomposition *D,operator_matrix *A,
   int Nx=D->get_Nx(), Ny=D->get_Ny(); 
   for(int i=0;i<Ny;++i) 
     for(int j=0;j<Nx;++j){ 
-      double x = (double)j/(Nx-1), y = (double)i/(Ny-1); 
+      double x = (double)j/(Nx+1), y = (double)i/(Ny+1); 
       RHS[j+Nx*i] = func(x,y); 
     } 
 } 
