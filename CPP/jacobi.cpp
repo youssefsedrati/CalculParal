@@ -26,10 +26,9 @@ JacobiMethod::JacobiMethod(operator_matrix *a,decomposition *dc,
 	N  = D->get_N();
 	Nx = D->get_Nx();
 	Ny = D->get_Ny();
-	Uup  = (double*) malloc(N*sizeof(double)); // used by comm_ctrl to send msgs
   Uit  = (double*) calloc(N,sizeof(double)); // solution is alternatingly stored in U and Uit
 	RHSit= (double*) malloc(N*sizeof(double)); // RHS updated via comm_ctrl
-	C = new comm_ctrl(D,A,RHS,RHSit,Uup);
+	C = new comm_ctrl(D,A,RHS,RHSit);
 }
 
 JacobiMethod::~JacobiMethod(){

@@ -23,12 +23,11 @@ CGMethod::CGMethod(operator_matrix *a,decomposition *dc,
 	myN  = D->get_myN(); N  = D->get_N();
 	myNx = D->get_myNx();Nx = D->get_Nx();
 	myNy = D->get_myNy();Ny = D->get_Ny();
-	Uup  = (double*) malloc(N*sizeof(double));
 	R  = (double*) malloc(myN*sizeof(double));
   P  = (double*) malloc(myN*sizeof(double));
   AP  = (double*) malloc(myN*sizeof(double));
 	RHSit= (double*) malloc(N*sizeof(double));
-	C = new comm_ctrl(D,A,RHS,RHSit,Uup);
+	C = new comm_ctrl(D,A,RHS,RHSit);
 }
 
 CGMethod::~CGMethod(){
@@ -150,7 +149,6 @@ void CGMethod::cleanup(){
 	if(R) free(R);
 	if(P) free(P);
 	if(AP) free(AP);
-	if(Uup) free(Uup);
 }
 
 double CGMethod::vector_product(double *X, double *Y){

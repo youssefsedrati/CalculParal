@@ -15,6 +15,7 @@ public:
 	~CGMethod();
 	void compute(int iterMax, double eps);
 	void save();
+	void save_gnuplot();
 private:
 // system variables
 	operator_matrix *A;
@@ -22,7 +23,7 @@ private:
 	comm_ctrl *C;
 
 	double eps, alpha, beta, gamma, norm;
-	double *RHS=NULL,*RHSit=NULL,*U=NULL,*R=NULL,*P=NULL,*AP=NULL,*Uup=NULL;
+	double *RHS=NULL,*RHSit=NULL,*U=NULL,*R=NULL,*P=NULL,*AP=NULL;
 	int iterMax,iter, myNx,myNy,myN, Nx,Ny,N;
 // MPI variables
   int myRank, nOfProcs;
