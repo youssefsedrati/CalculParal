@@ -7,9 +7,13 @@
    each process has its own decomposition holding the spatial points of its subdomain
 	 they are accessed by the global index getter functions.
  */
-decomposition::decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, int ny){
+decomposition::decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, int ny,
+		int overlap){
+	if(overlap<0) Overlap=0;
+	else if(overlap>nx/2 || overlap>ny/2) Overlap=min(nx,ny)/2;
+	else Overlap=overlap;
 	myRank = myrank; N_procs = nb_procs; N_procs_x = nb_procs_x; N_procs_y = N_procs/N_procs_x;
-	Nx = nx; Ny = ny; N = Nx*Ny;
+	Nx = nx; Ny = ny; N = Nx*Ny; 
 	if(is_admissable()){
 		myRank_x = myRank%N_procs_x;
 		myRank_y = (myRank-myRank_x)/N_procs_x;
@@ -115,11 +119,17 @@ bool decomposition::is_admissable(){
 	return( (N_procs>0)&&(N_procs_x>0)&&(myRank<N_procs)&&(N_procs_x*N_procs_y==N_procs) );
 }
 
+int decomposition::min(int a, int b){
+	return a<b ? a:b;
+}
+
 /* decompose() and its daughter functions */
 void decomposition::decompose(){
 		decompose_x();
 		decompose_y();
 		decompose_global();
+		if(index_x) free(index_x);
+		if(index_y) free(index_y);
 }
 
 void decomposition::decompose_x(){
@@ -133,6 +143,8 @@ void decomposition::decompose_x(){
 		myNx++;
 		begin = (carryover_start)*step+myNx*(myRank_x-carryover_start);
 	}
+	if(myRank_x<N_procs_x-1)
+		myNx+=Overlap;
 	index_x = (int*) malloc(myNx*sizeof(int));
 	for(int i=0;i<myNx;++i){
 		index_x[i] = begin+i;
@@ -150,6 +162,8 @@ void decomposition::decompose_y(){
 		myNy++;
 		begin = (carryover_start)*step+myNy*(myRank_y-carryover_start);
 	}
+	if(myRank_y<N_procs_y-1)
+		myNy+=Overlap;
 	index_y = (int*) malloc(myNy*sizeof(int));
 	for(int i=0;i<myNy;++i){
 		index_y[i] = begin+i;

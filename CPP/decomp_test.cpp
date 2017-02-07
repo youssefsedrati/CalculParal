@@ -10,12 +10,12 @@ void print_D(decomposition *D, int myRank);
 void print_D_inner(decomposition *D, int myRank);
 
 int main(){
-	int myRank, nOfProcs, nOfProcs_x=nOfProcs, nx=20, ny=20;
+	int myRank, nOfProcs, nOfProcs_x=nOfProcs, nx=10, ny=10, overlap=2;
 	MPI_Init(NULL,NULL);
   MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
   MPI_Comm_size(MPI_COMM_WORLD, &nOfProcs);
 	
-	decomposition D(myRank, nOfProcs, nOfProcs, nx, ny);
+	decomposition D(myRank, nOfProcs, nOfProcs, nx, ny,overlap);
 	for(int k=0;k<nOfProcs;++k){
 		if(myRank==k)
 			print_D(&D,myRank);

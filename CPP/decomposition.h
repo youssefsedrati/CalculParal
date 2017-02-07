@@ -9,7 +9,7 @@
 class decomposition{
 public:
 	decomposition();
-	decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, int ny);
+	decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, int ny, int overlap);
 	~decomposition();
   int *get_index_x();
 	int *get_index_y();
@@ -39,7 +39,8 @@ private:
 	int myRank, myRank_x, myRank_y,
 			N_procs, N_procs_x, N_procs_y,
 			N, Nx, Ny,
-			myN, myNx, myNy, myNinner;
+			myN, myNx, myNy, myNinner,
+			Overlap;
 // functions
 	bool is_admissable();
 	void decompose();
@@ -52,6 +53,7 @@ private:
 	void accumulate_global_left();
 	void accumulate_global_right();
 	void accumulate_global_inner();
+	int min(int a, int b);
 };
 
 #endif
