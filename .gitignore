@@ -7,3 +7,5 @@
 *.dat
 *.data
 .DS_Store
+*.png
+times*
