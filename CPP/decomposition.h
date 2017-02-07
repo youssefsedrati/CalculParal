@@ -19,6 +19,10 @@ public:
 	int *get_index_global_left();
 	int *get_index_global_right();
 	int *get_index_global_inner();
+	int *get_index_global_msg_top();
+	int *get_index_global_msg_bottom();
+	int *get_index_global_msg_left();
+	int *get_index_global_msg_right();
 	int get_myNx();
 	int get_myNy();
 	int get_myN();
@@ -36,6 +40,8 @@ private:
 			*index_global_top=NULL, *index_global_bottom=NULL, 
 			*index_global_left=NULL, *index_global_right=NULL,
 			*index_global_inner=NULL;
+			*index_global_msg_top=NULL, *index_global_msg_bottom=NULL,
+			*index_global_msg_left=NULL, *index_global_msg_right=NULL;
 	int myRank, myRank_x, myRank_y,
 			N_procs, N_procs_x, N_procs_y,
 			N, Nx, Ny,
@@ -53,6 +59,11 @@ private:
 	void accumulate_global_left();
 	void accumulate_global_right();
 	void accumulate_global_inner();
+	void accumulate_global_msg();
+	void accumulate_global_msg_top();
+	void accumulate_global_msg_bottom();
+	void accumulate_global_msg_left();
+	void accumulate_global_msg_right();
 	int min(int a, int b);
 };
 

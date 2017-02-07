@@ -20,6 +20,7 @@ decomposition::decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, i
 		decompose();
 		accumulate_global_borders();
 		accumulate_global_inner();
+		accumulate_global_msg();
 	}
 	else std::cout << "Error: decomposition for #" << myrank << " is not admissable.\n";
 }
@@ -33,6 +34,10 @@ decomposition::~decomposition(){
 	if(index_global_left) free(index_global_left);
 	if(index_global_right) free(index_global_right);
 	if(index_global_inner) free(index_global_inner);
+	if(index_global_msg_top) free(index_global_msg_top);
+	if(index_global_msg_bottom) free(index_global_msg_bottom);
+	if(index_global_msg_left) free(index_global_msg_left);
+	if(index_global_msg_right) free(index_global_msg_right);
 }
 
 int* decomposition::get_index_x(){
@@ -65,6 +70,26 @@ int* decomposition::get_index_global_right(){
 
 int* decomposition::get_index_global_inner(){
 	return index_global_inner;
+}
+
+int* decomposition::get_index_global_msg_top(){	
+	if(Overlap<1 || myRank_y>=N_procs_y-1) return index_global_top;
+	return index_global_msg_top;
+}
+
+int* decomposition::get_index_global_msg_bottom(){
+	if(Overlap<1 || myRank_y<1) return index_global_bottom;
+	return index_global_msg_bottom;
+}
+
+int* decomposition::get_index_global_msg_left(){
+	if(myRank_x<1 || Overlap<1) return index_global_left;
+	return index_global_msg_left;
+}
+
+int* decomposition::get_index_global_msg_right(){
+	if(Overlap<1 || myRank_x>=N_procs_x-1) return index_global_right;
+	return index_global_msg_right;
 }
 
 int decomposition::get_myNx(){
@@ -217,4 +242,41 @@ void decomposition::accumulate_global_inner(){
 	for(int i=1;i<myNx-1;++i)
 		for(int j=1;j<myNy-1;++j)
 			index_global_inner[i-1+(j-1)*(myNx-2)]= index_global[i+j*myNx];
+}
+
+void decomposition::accumulate_global_msg(){
+	accumulate_global_msg_top();
+	accumulate_global_msg_bottom();
+	accumulate_global_msg_left();
+	accumulate_global_msg_right();
+}
+
+void decomposition::accumulate_global_msg_top(){
+	if(myRank_y>=N_procs_y-1 || Overlap<1) return;
+	index_global_msg_top = (int*)malloc(myNx*sizeof(int));
+	int begin = (myNy-1-Overlap)*myNx;
+	for(int i=0;i<myNx;++i)
+		index_global_msg_top[i]= index_global[i+begin];
+}
+
+void decomposition::accumulate_global_msg_bottom(){
+	if(myRank_y<1 || Overlap<1) return;
+	index_global_msg_bottom = (int*)malloc(myNx*sizeof(int));
+	int begin = Overlap*myNx;
+	for(int i=0;i<myNx;++i)
+		index_global_msg_bottom[i]= index_global[i+begin];
+}
+
+void decomposition::accumulate_global_msg_left(){
+	if(myRank_x<1 ||Overlap<1) return;
+	index_global_msg_left = (int*)malloc(myNy*sizeof(int));
+	for(int i=0;i<myNy;++i)
+		index_global_msg_left[i]= index_global[i*myNx+Overlap];
+}
+
+void decomposition::accumulate_global_msg_right(){	
+	if(myRank_x>=N_procs_x-1 || Overlap<1) return;
+	index_global_msg_right = (int*)malloc(myNy*sizeof(int));
+	for(int i=0;i<myNy;++i)
+		index_global_msg_right[i]= index_global[(i+1)*myNx-1-Overlap];
 }
