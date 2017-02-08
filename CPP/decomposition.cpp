@@ -9,11 +9,11 @@
  */
 decomposition::decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, int ny,
 		int overlap){
-	if(overlap<0) Overlap=0;
-	else if(overlap>nx/2 || overlap>ny/2) Overlap=min(nx,ny)/2;
-	else Overlap=overlap;
 	myRank = myrank; N_procs = nb_procs; N_procs_x = nb_procs_x; N_procs_y = N_procs/N_procs_x;
 	Nx = nx; Ny = ny; N = Nx*Ny; 
+	if(overlap<0) Overlap=0;
+	else if(2*overlap>Nx/N_procs_x || 2*overlap>Ny/N_procs_y) Overlap=min(Nx/N_procs_x,Ny/N_procs_y)/2;
+	else Overlap=overlap;
 	if(is_admissable()){
 		myRank_x = myRank%N_procs_x;
 		myRank_y = (myRank-myRank_x)/N_procs_x;
@@ -138,6 +138,10 @@ int decomposition::get_N_procs_x(){
 
 int decomposition::get_N_procs_y(){
 	return N_procs_y;
+}
+
+int decomposition::get_overlap(){
+	return Overlap;
 }
 
 bool decomposition::is_admissable(){

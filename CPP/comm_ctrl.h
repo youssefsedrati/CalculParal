@@ -38,6 +38,7 @@ private:
 	void send_update_toLeft(double *u);
 	void send_update_toRight(double *u);
 	void receive_updates();
+	void reset_RHS();
 	void receive_update_fromBottom();
 	void receive_update_fromTop();
 	void receive_update_fromLeft();

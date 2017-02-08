@@ -44,12 +44,11 @@ void JacobiMethod::compute(int itermax, double e, bool neumannBC){
 }
 
 void JacobiMethod::save(){
-	if(myRank!=0) return;
+	//if(myRank!=0) return;
 	cout << "#" << myRank << ". saving.\n";
-	std::string filename = "Jacobi_test_sol.data";
-	//filename.append(to_string(myRank)); filename.append(".data");
-	//FILEOUT = 
-	std::ofstream ofs("Jacobi_test_sol.data",std::ofstream::out);
+	std::string filename = "Jacobi_test_";
+	filename.append(to_string(myRank)); filename.append(".data");
+	std::ofstream ofs(filename,std::ofstream::out);
 	if(!ofs) return;
 	ofs << Nx << " "<< Ny <<endl;
 	for(int i=Ny-1;i>=0;--i){
@@ -209,7 +208,6 @@ void JacobiMethod::compute_dist_squared(){
 		Di= U[j]-Uit[j];
 		dist_squared+= Di*Di;
 	}
-	dist_squared *= myN*myN;
 }
 
 void JacobiMethod::compute_gen_sol(){

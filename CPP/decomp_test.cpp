@@ -12,7 +12,7 @@ void print_D_col(decomposition *D, int myRank);
 void print_D_row(decomposition *D, int myRank);
 
 int main(){
-	int myRank, nOfProcs, nOfProcs_x=nOfProcs, nx=10, ny=10, overlap=1;
+	int myRank, nOfProcs, nOfProcs_x=nOfProcs, nx=10, ny=20, overlap=1;
 	MPI_Init(NULL,NULL);
   MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
   MPI_Comm_size(MPI_COMM_WORLD, &nOfProcs);
@@ -65,7 +65,7 @@ void print_D_col(decomposition *D, int myRank){
 }
 
 void print_D_row(decomposition *D, int myRank){
-	int* index = D->get_index_global_msg_bottom(), 
+	int* index = D->get_index_global_msg_top(), 
 			 myNx=D->get_myNx();
 	//cout << "#" << myRank << ". " << myNx << " " << myNy;
 	cout <<endl<< "#" << myRank << ". ";	

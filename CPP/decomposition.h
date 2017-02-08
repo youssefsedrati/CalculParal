@@ -35,6 +35,7 @@ public:
 	int get_N_procs();
 	int get_N_procs_x();
 	int get_N_procs_y();
+	int get_overlap();
 private:
 	int *index_x=NULL, *index_y=NULL, *index_global=NULL,
 			*index_global_top=NULL, *index_global_bottom=NULL, 
