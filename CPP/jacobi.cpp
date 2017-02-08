@@ -97,18 +97,27 @@ void JacobiMethod::init_sys(){
 }
 
 void JacobiMethod::compute_iterate(){	
-	while( (iter<=iterMax)&&(dist_squared>eps*eps) ){
-		C->receive(); // eventually wait until all processors have sent
-		if(iter%2){
-			compute_alternate_update(Uit,U);
-			C->send(U);// eventually wait until all processors have received
-		}else{
-			compute_alternate_update(U,Uit);
-			C->send(Uit);
-		}
-		compute_dist_squared();
+	double eps_sq = eps*eps;
+	while( (iter<=200)&&(dist_squared>eps_sq) ){
+		C->receive(); 
+		compute_iterate_local();
+		C->send(U);
 		C->cumulate_dist_squared(&dist_squared);
 		iter+=1;
+	}
+}
+
+void JacobiMethod::compute_iterate_local(){
+	int it=0;
+	double eps_ = eps*eps*D->get_N_procs();
+	while( (dist_squared>eps_) ){
+		if(it%2){
+			compute_alternate_update(Uit,U);
+		}else{
+			compute_alternate_update(U,Uit);
+		}
+		compute_dist_squared();
+		it++;
 	}
 }
 
@@ -216,7 +225,7 @@ void JacobiMethod::compute_gen_sol(){
 	C->compile_solution(U);		
   if(myRank == 0){
     printf("Jacobi method terminated after"
-           " %d iterations, squared_dist= %0.31f\n", iter-1,sqrt(dist_squared));
+           " %d iterations, dist= %0.31f\n", iter-1,sqrt(dist_squared));
   }
 }
 
