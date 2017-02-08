@@ -47,6 +47,19 @@ void comm_ctrl::receive(){
 
 // fills solution vector at end of calculus
 void comm_ctrl::compile_solution(double *U){
+	int overlap = D->get_overlap(),
+			*idx= D->get_index_global_msg_top();
+	if(D->get_myRank_y() < D->get_N_procs_y()-1){
+		for(int k=1;k<=overlap;++k)
+			for(int j=0;j<myNx;++j)
+				U[idx[j]+k*D->get_Nx()] = 0;
+	}
+	idx= D->get_index_global_msg_right();
+	if(D->get_myRank_x() < D->get_N_procs_x()-1){
+		for(int k=1;k<=overlap;++k)
+			for(int j=0;j<myNy;++j)
+				U[idx[j]+k] = 0;
+	}
 	MPI_Allreduce(MPI_IN_PLACE, U, D->get_N(), MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 }
 
@@ -92,7 +105,7 @@ void comm_ctrl::send_updates(double *U){
 
 void comm_ctrl::send_update_toBottom(double *U){
 	if(bottomRank<0) return;
-	int *idx = D->get_index_global_bottom();
+	int *idx = D->get_index_global_msg_bottom();
 	for(int i=0;i<myNx;++i){
 		int j = idx[i];
 		u_bot[i] = U[j];
@@ -102,7 +115,7 @@ void comm_ctrl::send_update_toBottom(double *U){
 
 void comm_ctrl::send_update_toTop(double *U){
 	if(topRank<0) return;
-	int *idx = D->get_index_global_top();
+	int *idx = D->get_index_global_msg_top();
 	for(int i=0;i<myNx;++i){
 		int j = idx[i];
 		u_top[i] = U[j];
@@ -112,7 +125,7 @@ void comm_ctrl::send_update_toTop(double *U){
 
 void comm_ctrl::send_update_toLeft(double *U){
 	if(leftRank<0) return;
-	int *idx = D->get_index_global_left();
+	int *idx = D->get_index_global_msg_left();
 	for(int i=0;i<myNy;++i){
 		int j = idx[i];
 		u_left[i] = U[j];
@@ -122,7 +135,7 @@ void comm_ctrl::send_update_toLeft(double *U){
 
 void comm_ctrl::send_update_toRight(double *U){
 	if(rightRank<0) return;
-	int *idx = D->get_index_global_right();
+	int *idx = D->get_index_global_msg_right();
 	for(int i=0;i<myNy;++i){
 		int j = idx[i];
 		u_right[i] = U[j];
@@ -135,10 +148,26 @@ void comm_ctrl::send_update_toRight(double *U){
 	 data is then worked into the RHS update vector.
 */
 void comm_ctrl::receive_updates(){
+	reset_RHS();
 	receive_update_fromBottom();
 	receive_update_fromTop();
 	receive_update_fromLeft();
 	receive_update_fromRight();
+}
+
+void comm_ctrl::reset_RHS(){
+	int *idx = D->get_index_global_bottom();
+	for(int i=0;i<myNx;++i)
+		RHS_up[idx[i]] = RHS[idx[i]];
+	idx = D->get_index_global_top();
+	for(int i=0;i<myNx;++i)
+		RHS_up[idx[i]] = RHS[idx[i]];
+	idx = D->get_index_global_left();
+	for(int i=0;i<myNy;++i)
+		RHS_up[idx[i]] = RHS[idx[i]];
+	idx = D->get_index_global_right();
+	for(int i=0;i<myNy;++i)
+		RHS_up[idx[i]] = RHS[idx[i]];
 }
 
 void comm_ctrl::receive_update_fromBottom(){
@@ -147,7 +176,7 @@ void comm_ctrl::receive_update_fromBottom(){
 	int *idx = D->get_index_global_bottom();
 	for(int i=0;i<myNx;++i){
 		int j = idx[i];
-		RHS_up[j] = RHS[j] - A->Cy() * u_bot[i];
+		RHS_up[j] -= A->Cy() * u_bot[i];
 	}
 }
 
@@ -157,7 +186,7 @@ void comm_ctrl::receive_update_fromTop(){
 	int *idx = D->get_index_global_top();
 	for(int i=0;i<myNx;++i){
 		int j = idx[i];
-		RHS_up[j] = RHS[j] - A->Cy() * u_top[i];
+		RHS_up[j] -= A->Cy() * u_top[i];
 	}
 }
 
@@ -167,7 +196,7 @@ void comm_ctrl::receive_update_fromLeft(){
 	int *idx = D->get_index_global_left();
 	for(int i=0;i<myNy;++i){
 		int j = idx[i];
-		RHS_up[j] = RHS[j] - A->Cx() * u_left[i];
+		RHS_up[j] -= A->Cx() * u_left[i];
 	}
 }
 
@@ -177,6 +206,6 @@ void comm_ctrl::receive_update_fromRight(){
 	int *idx = D->get_index_global_right();
 	for(int i=0;i<myNy;++i){
 		int j = idx[i];
-		RHS_up[j] = RHS[j] - A->Cx() * u_right[i];
+		RHS_up[j] -= A->Cx() * u_right[i];
 	}
 }

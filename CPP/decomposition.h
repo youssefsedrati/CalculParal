@@ -9,7 +9,7 @@
 class decomposition{
 public:
 	decomposition();
-	decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, int ny);
+	decomposition(int myrank, int nb_procs, int nb_procs_x, int nx, int ny, int overlap);
 	~decomposition();
   int *get_index_x();
 	int *get_index_y();
@@ -19,6 +19,10 @@ public:
 	int *get_index_global_left();
 	int *get_index_global_right();
 	int *get_index_global_inner();
+	int *get_index_global_msg_top();
+	int *get_index_global_msg_bottom();
+	int *get_index_global_msg_left();
+	int *get_index_global_msg_right();
 	int get_myNx();
 	int get_myNy();
 	int get_myN();
@@ -31,15 +35,19 @@ public:
 	int get_N_procs();
 	int get_N_procs_x();
 	int get_N_procs_y();
+	int get_overlap();
 private:
 	int *index_x=NULL, *index_y=NULL, *index_global=NULL,
 			*index_global_top=NULL, *index_global_bottom=NULL, 
 			*index_global_left=NULL, *index_global_right=NULL,
 			*index_global_inner=NULL;
+			*index_global_msg_top=NULL, *index_global_msg_bottom=NULL,
+			*index_global_msg_left=NULL, *index_global_msg_right=NULL;
 	int myRank, myRank_x, myRank_y,
 			N_procs, N_procs_x, N_procs_y,
 			N, Nx, Ny,
-			myN, myNx, myNy, myNinner;
+			myN, myNx, myNy, myNinner,
+			Overlap;
 // functions
 	bool is_admissable();
 	void decompose();
@@ -52,6 +60,12 @@ private:
 	void accumulate_global_left();
 	void accumulate_global_right();
 	void accumulate_global_inner();
+	void accumulate_global_msg();
+	void accumulate_global_msg_top();
+	void accumulate_global_msg_bottom();
+	void accumulate_global_msg_left();
+	void accumulate_global_msg_right();
+	int min(int a, int b);
 };
 
 #endif
