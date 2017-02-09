@@ -26,6 +26,12 @@ double null(double x,double y){
 double one(double x,double y){ 
   return 1+ 0*x*y; 
 } 
+
+void fill_U_init(decomposition *D,double *U){
+	int *idx=D->get_index_global(), myN=D->get_myN();
+	for(int i=0;i<myN;++i)
+		U[idx[i]] = 1;
+}
  
 void fill_RHS_force(decomposition *D,operator_matrix *A,  
       double *RHS,double(*func)(double,double)){ 

@@ -94,7 +94,7 @@ void CGMethod::init_sys(){
 
 void CGMethod::compute_iterate(){
 	double eps_sq=eps*eps;
-	while( (iter<=30) && (norm>eps) ){
+	while( (iter<=30)){// && (norm>eps) ){
 		C->receive();
 		compute_iterate_local();
 		C->send(U);

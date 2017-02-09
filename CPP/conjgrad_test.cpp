@@ -28,7 +28,7 @@ int main(){
 	U  = (double*) calloc(N,sizeof(double));
 	RHS  = (double*) calloc(N,sizeof(double));
 	
-	fill_RHS_force(&Dc,&A,U,&g);
+	fill_U_init(&Dc,U);
 	fill_RHS_force(&Dc,&A,RHS,&one);
 	//fill_RHS_NeumannBC(&Dc,&A,RHS);
 	fill_RHS_DirichletBC(&Dc,&A,RHS,&null);
