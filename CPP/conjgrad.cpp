@@ -88,32 +88,43 @@ void CGMethod::init_MPI(){
 }
 
 void CGMethod::init_sys(){
-	matrix_vector_product_global(U,AP);
-	for(int i=0;i<N;++i){
+	for(int i=0;i<N;++i)
 		RHSit[i] = RHS[i];
-		U[i] = 0;
-	}
-	int *idx = D->get_index_global(), j;
-	for(int i=0;i<myN;++i){
-		j = idx[i];
-		U[j] = 1;
-		R[i] = RHSit[j] - AP[i];
-		P[i] = Z[i] = R[i]/A->Aii();
-	}
 }
 
 void CGMethod::compute_iterate(){
-	while( (iter<=iterMax)&&(norm>eps*eps) ){
-		C->receive(); // eventually wait until all processors have sent
+	double eps_sq=eps*eps;
+	while( (iter<=30) && (norm>eps) ){
+		C->receive();
+		compute_iterate_local();
+		C->send(U);
+		C->cumulate_dist_squared(&norm);
+		iter+=1;
+	}
+}
+
+void CGMethod::compute_iterate_local(){
+	int it=1;
+	double eps_ = eps*eps*D->get_N_procs();
+	compute_iterate_local_init();
+	while( it<=1000 && norm>eps_ ){ 
 		compute_alpha();
 		compute_update();
 		compute_residue();
 		compute_beta();
 		compute_gradient();
-		C->send(U);// eventually wait until all processors have received
-		C->cumulate_dist_squared(&norm);
-		iter+=1;
+		it++;
 	}
+}
+
+void CGMethod::compute_iterate_local_init(){
+	int *idx = D->get_index_global(), j;
+	matrix_vector_product_global(U,AP);
+	for(int i=0;i<myN;++i){
+		j = idx[i];
+		R[i] = RHSit[j] - AP[i];
+		Z[i] = P[i] = R[i]/A->Aii();
+	}	
 }
 
 void CGMethod::compute_alpha(){
@@ -130,16 +141,17 @@ void CGMethod::compute_update(){
 }
 
 void CGMethod::compute_residue(){
-	int *idx = D->get_index_global();
+	/*int *idx = D->get_index_global();
 	matrix_vector_product_global(U,R);
 	for(int i=0;i<myN;++i){
 		int j = idx[i];
 		R[i] = RHSit[j] - R[i];
 		Z[i] = R[i]/A->Aii();
-	}
-	/*for(int i=0;i<myN;++i){
-		R[i] = R[i] - alpha*AP[i];
 	}*/
+	for(int i=0;i<myN;++i){
+		R[i] = R[i] - alpha*AP[i];
+		Z[i] = R[i]/A->Aii();
+	}
 }
 
 void CGMethod::compute_beta(){
@@ -168,6 +180,7 @@ void CGMethod::cleanup(){
 	if(R) free(R);
 	if(P) free(P);
 	if(AP) free(AP);
+	if(Z) free(Z);
 }
 
 double CGMethod::vector_product(double *X, double *Y){
