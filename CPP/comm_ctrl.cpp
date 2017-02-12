@@ -78,7 +78,7 @@ void comm_ctrl::init_neighbour_ranks(){
 
 void comm_ctrl::init_group_behaviour(){
 	am_I_in_rootGroup = ( (D->get_myRank_x()+D->get_myRank_y())%2==0 ) ? true:false;
-	is_myGroup_waiting = !am_I_in_rootGroup;
+	is_myGroup_waiting = false;//!am_I_in_rootGroup;
 }
 
 // sends integer to sendRank who receives from his recvRank (this process)

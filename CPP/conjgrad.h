@@ -34,6 +34,8 @@ private:
 	void init_sys();
 	void init_MPI();
 	void compute_iterate();
+	void compute_iterate_local();
+	void compute_iterate_local_init();
 	void compute_alpha();
 	void compute_update();
 	void compute_residue();

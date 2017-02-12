@@ -35,6 +35,7 @@ private:
 	void init_sys();
 	void init_MPI();
 	void compute_iterate();
+	void compute_iterate_local();
 	void compute_comm_main();
 	void compute_alternate_update(double* U1, double* U2);
 	void compute_alternate_update_inner(double* U1, double* U2);
