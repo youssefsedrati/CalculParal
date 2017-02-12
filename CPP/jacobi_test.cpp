@@ -17,8 +17,8 @@ int main(){
   MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
   MPI_Comm_size(MPI_COMM_WORLD, &n_procs);
 	
-  int Nx = 20,Ny =20,N = Nx*Ny, maxiter=100, overlap = 3;
-	double 	Lx = 1.,  Ly = 1., D =1., eps = 1e-6*N, t1,t2;
+  int Nx = 20,Ny =20,N = Nx*Ny, maxiter=50000, overlap = 0;
+	double 	Lx = 1.,  Ly = 1., D =1., eps = 1e-9*N, t1,t2;
 	bool NeumannBC = false;
 	
 	if(!myRank) t1=MPI_Wtime(); 

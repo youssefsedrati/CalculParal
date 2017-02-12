@@ -94,12 +94,11 @@ void CGMethod::init_sys(){
 
 void CGMethod::compute_iterate(){
 	double eps_sq=eps*eps;
-	while( (iter<=30)){// && (norm>eps) ){
+	while( (iter<=iterMax)&& (norm>eps) ){
 		C->receive();
 		compute_iterate_local();
 		C->send(U);
 		C->cumulate_dist_squared(&norm);
-		iter+=1;
 	}
 }
 
@@ -107,13 +106,15 @@ void CGMethod::compute_iterate_local(){
 	int it=1;
 	double eps_ = eps*eps*D->get_N_procs();
 	compute_iterate_local_init();
-	while( it<=1000 && norm>eps_ ){ 
+	while( (it<=D->get_myNx()||it<=D->get_myNy()) && norm>eps_ ){ 
 		compute_alpha();
 		compute_update();
 		compute_residue();
 		compute_beta();
 		compute_gradient();
 		it++;
+		iter+=1;
+		if(iter<=iterMax) return;
 	}
 }
 
