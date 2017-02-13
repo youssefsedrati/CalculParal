@@ -1,0 +1,7 @@
+# Nx=Ny= 40, eps = 10e-9*Nx*Ny, maxiter= 50000, n_procs_x = 1 (vector array)
+# overlap = 3
+#NbProc                   SpeedUp
+1                         1
+2                         1.50552596009
+3                         1.78562554663
+4                         1.98827721237

@@ -1,0 +1,7 @@
+# Nx=Ny= 80, eps = 10e-9*Nx*Ny, maxiter= 50000, n_procs_x = 1 (matrix array)
+# overlap = 0
+#NbProc               SpeedUp
+1                     1
+2                     1.03630766064
+3                     1.04236205662
+4                     1.08600611054

@@ -1,0 +1,7 @@
+# Using gunplot.
+gnuplot>
+set xlabel « NbProc »
+set ylabel « SpeedUp »
+plot « choose the file from data » using 1:2 title ‘..’ with lines
+#if you want many curves in the same file  
+replot « choose the file from data » using 1:2 title ‘..’ with lines

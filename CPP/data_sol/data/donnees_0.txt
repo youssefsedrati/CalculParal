@@ -1,0 +1,8 @@
+# Nx=Ny= 12, eps = 10e-10*Nx*Ny, maxiter= 99999, n_procs_x = 1 (vector array)
+#overlap = 0
+#Nb_processeur           Speed_up
+1                        1                           
+2                        1.08664876056               
+3                        0.93493332049               
+4                        0.88706595305                
+
